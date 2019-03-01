@@ -7,6 +7,8 @@ from dicts.ras_dic import PinsBuzzer, PinsDown, PinsOK
 from lib import Display, CardReader, PasBuz, Button
 from lib import OdooXMLrpc, Tasks
 
+import subprocess # TODO only for tests REMOVE later
+
 _logger = logging.getLogger(__name__)
 
 Buz = PasBuz.PasBuz(PinsBuzzer)
@@ -81,3 +83,24 @@ def main_loop():
 
 
 main_loop()
+
+#msg=str(Odoo._get_user_id())
+
+
+#print (subprocess.check_output(
+#                'ifconfig wlan0', shell=True).decode('utf-8'))
+#print (subprocess.check_output(
+#                'ifconfig eth0', shell=True).decode('utf-8'))
+
+#ifconfig_out = subprocess.check_output(
+#                'ifconfig eth0', shell=True).decode('utf-8')
+#if 'UP' in ifconfig_out:
+#    interface_active = True
+#else:
+#    interface_active = False
+
+#msg= str(    interface_active )
+
+#print (msg)
+#Disp.display_msg_raw((10,10), 20, msg)
+#input()
