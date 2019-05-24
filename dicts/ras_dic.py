@@ -1,5 +1,5 @@
 # FIRMWARE Version
-FIRMWARE_VERSION = 'v1.2.5'
+FIRMWARE_VERSION = 'v1.2.6'
 
 # reference to find different files in
 # the memory of the device
@@ -22,6 +22,9 @@ PinPowerDown = 35
 
 PinSignalOK = 29  # OK button signal
 PinPowerOK = 35
+
+PinLedGreen =36
+PinLedRed = 32
 
 PinsBuzzer = (PinSignalBuzzer, PinPowerBuzzer)
 PinsDown = (PinSignalDown, PinPowerDown)

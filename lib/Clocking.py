@@ -1,6 +1,10 @@
 import time
 import subprocess
 import logging
+from dicts.ras_dic import PinSignalBuzzer, PinPowerBuzzer, PinLedGreen, PinLedRed
+
+
+import RPi.GPIO as GPIO
 
 _logger = logging.getLogger(__name__)
 
@@ -37,6 +41,20 @@ class Clocking:
         self.checkodoo_wifi = True
         self.odoo_m         = " "
         self.wifi_m         = " "
+
+        self.loud_and_led_feedback   = True
+
+        self.LedGreen  = PinLedGreen
+        self.LedRed    = PinLedRed
+        self.BuzSignal = PinSignalBuzzer
+        self.BuzPower  = PinPowerBuzzer
+
+        GPIO.setmode(GPIO.BOARD)
+        GPIO.setup(self.LedGreen, GPIO.OUT)
+        GPIO.setup(self.LedRed, GPIO.OUT)
+        GPIO.setup(self.BuzSignal, GPIO.OUT)
+        GPIO.setup(self.BuzPower, GPIO.OUT)
+
         _logger.debug('Clocking Class Initialized')
 
     # ___________________
@@ -141,6 +159,57 @@ class Clocking:
         else:
              self.odoo_m = self.odoo_msg()  # get odoo connection msg
 
+    def loud_and_led(self, message):
+
+            GPIO.output(self.BuzPower, 1)
+
+            if message == 'check_in':
+                GPIO.output(self.LedGreen, 1)
+                GPIO.output(self.BuzSignal, 1)
+                time.sleep(0.25)
+                GPIO.output(self.BuzSignal, 0)
+                time.sleep(0.05)
+                GPIO.output(self.BuzSignal, 1)
+                time.sleep(0.1)
+                GPIO.output(self.BuzSignal, 0)
+                time.sleep(0.05)
+                GPIO.output(self.BuzSignal, 1)
+                time.sleep(0.1)
+                GPIO.output(self.BuzSignal, 0)
+                time.sleep(0.6)
+                GPIO.output(self.LedGreen, 0)
+
+            if message == 'check_out':
+                GPIO.output(self.LedGreen, 1)
+                GPIO.output(self.BuzSignal, 1)
+                time.sleep(0.1)
+                GPIO.output(self.BuzSignal, 0)
+                time.sleep(0.05)
+                GPIO.output(self.BuzSignal, 1)
+                time.sleep(0.1)
+                GPIO.output(self.BuzSignal, 0)
+                time.sleep(0.05)
+                GPIO.output(self.LedGreen, 0)
+                GPIO.output(self.BuzSignal, 1)
+                time.sleep(0.35)
+                GPIO.output(self.LedGreen, 1)
+                GPIO.output(self.BuzSignal, 0)
+                time.sleep(0.6)
+                GPIO.output(self.LedGreen, 0)
+
+            if message != 'check_in' and message != 'check_out':
+                GPIO.output(self.LedRed, 1)
+                for x in range(8):
+                    GPIO.output(self.BuzSignal, 1)
+                    time.sleep(0.05)
+                    GPIO.output(self.BuzSignal, 0)
+                    time.sleep(0.05)
+                time.sleep(0.6)
+                GPIO.output(self.LedRed, 0)
+
+
+            GPIO.output(self.BuzPower, 0)
+
     def clocking(self):
         # Main Functions of the Terminal:
         # Show Time and do the clockings (check in/out)
@@ -183,7 +252,10 @@ class Clocking:
 
 
                 self.Disp.display_msg(self.msg)  # clocking message
-                self.Buzz.Play(self.msg)  # clocking acoustic feedback
+                if self.loud_and_led_feedback:
+                    self.loud_and_led(self.msg) # active buzzer loud + leds
+                else:
+                    self.Buzz.Play(self.msg)  # passive buzzer acoustic feedback
 
                 rest_time = self.card_logging_time_min - \
                     (time.perf_counter() - begin_card_logging)
