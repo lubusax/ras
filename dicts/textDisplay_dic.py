@@ -7,12 +7,12 @@ listOfLanguages = [
 ]
 
 # allows to display the different messages by defining the parameters needed to  use
-# the function multiline of luma.core
-#
-# [ (x0,y0), font size , text of the message]
-#
-# (x0,y0) positions the message in the screen defining the origin
-# the message can extend over several lines this is indicated with the escape character \n
+  # the function multiline of luma.core
+  #
+  # [ (x0,y0), font size , text of the message]
+  #
+  # (x0,y0) positions the message in the screen defining the origin
+  # the message can extend over several lines this is indicated with the escape character \n
 
 messages_dic = {
     ' ':

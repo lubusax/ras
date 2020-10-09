@@ -25,7 +25,11 @@ class Display:
         self.font3 = ImageFont.truetype(self.font_ttf, 22)
         self.fileDeviceCustomization = WORK_DIR + "dicts/deviceCustomization.json"
         self.getSettingsFromFile()
+        self.getMessagesDic()
     
+    def getMessagesDic(self):
+        self.messagesDic = messages_dic
+
     def getSettingsFromFile(self):
         data = Utils.getJsonData(self.fileDeviceCustomization)
         if data:
@@ -90,7 +94,7 @@ class Display:
         _logger.debug("Displaying message: " + text)
 
     def getMsgTranslated(self, textKey):
-        dictWithAllLanguages = messages_dic.get(textKey)
+        dictWithAllLanguages = self.messagesDic.get(textKey)
         msgTranslated = dictWithAllLanguages.get(self.language)       
         return copy.deepcopy(msgTranslated)
 

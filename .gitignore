@@ -12,3 +12,6 @@ sync_flag.*
 test.py
 src/pip-delete-this-directory.txt
 dicts/deviceCustomization.json
+scripts/wifi-connect-raspbian-install.sh
+src/python3-wifi
+src/spi-py
