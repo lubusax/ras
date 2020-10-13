@@ -254,5 +254,26 @@
         "ENGLISH": [[0, 0], 14,"Browse to\n-IpPlaceholder-:3000\nto introduce new\nEtRH parameters\n-----------------\n"],
         "ESPAÑOL": [[0, 0], 14,"Navege a\n-IpPlaceholder-:3000\npara definir nuevos\nParámetros EtRH\n-----------------\n"],
         "FRANÇAIS": [[0, 0], 14,"Ouvrez l\"URL\n-IpPlaceholder-:3000\npour definir les\nparamètres EtRH\n-----------------\n"]
-      }     
+      },
+      
+  "clockScreen_databaseOK":
+      {
+        "ENGLISH": [[0, 0], 14,"EtRH connected\n-----------------\n"],
+        "ESPAÑOL": [[0, 0], 14,"EtRH conectado\n-----------------\n"],
+        "FRANÇAIS": [[0, 0], 14,"EtRH connecté\n-----------------\n"]
+      },
+
+  "clockScreen_databaseNotConnected":
+  {
+    "ENGLISH": [[0, 0], 14,"EtRH disconnected\n-----------------\n"],
+    "ESPAÑOL": [[0, 0], 14,"EtRH desconectado\n-----------------\n"],
+    "FRANÇAIS": [[0, 0], 14,"EtRH déconnecté\n-----------------\n"]
+  },
+
+  "noWiFiSignal":
+  {
+    "ENGLISH": [[0, 0], 14,"No WiFi signal"],
+    "ESPAÑOL": [[0, 0], 14,"No hay señal WiFi"],
+    "FRANÇAIS": [[0, 0], 14,"Aucun Signal WIFI"]
+  }
 }

@@ -1,6 +1,5 @@
 import time
 import logging
-import copy
 
 from PIL import Image, ImageFont
 from luma.core.render import canvas
@@ -35,8 +34,8 @@ class Display:
                 draw.text((31, 19), hour, font=self.font1, fill="white")
             else:
                 draw.text((34, 19), hour, font=self.font1, fill="white")
-            draw.text((0, 0), wifi_quality, font=self.font2, fill="white")
-            draw.text((0, 52), odoo_m, font=self.font2, fill="white")
+            draw.text((0, 0), wifi_quality+"\n"*7+"-"*17, font=self.font2, fill="white", align="center")
+            draw.text((0, 52), odoo_m, font=self.font2, fill="white", align="center")
 
     def showCard(self,card):
         with canvas(self.device) as draw:
@@ -73,13 +72,8 @@ class Display:
             draw.multiline_text(origin, text, fill="white", font=font, align="center")
         _logger.debug("Displaying message: " + text)
 
-    def getMsgTranslated(self, textKey):
-        dictWithAllLanguages = Utils.settings["messagesDic"].get(textKey)
-        msgTranslated = dictWithAllLanguages.get(Utils.settings["language"])       
-        return copy.deepcopy(msgTranslated)
-
     def display_msg(self, textKey, employee_name = None):
-        message = self.getMsgTranslated(textKey)
+        message = Utils.getMsgTranslated(textKey)
         if '-EmployeePlaceholder-' in message[2]:
             if employee_name and Utils.settings["showEmployeeName"] == "yes":
                 employeeName = employee_name.split(" ",1)
@@ -93,7 +87,7 @@ class Display:
         self.displayMsgRaw(message)
     
     def displayWithIP(self, textKey):
-        message = self.getMsgTranslated(textKey)
+        message = Utils.getMsgTranslated(textKey)
         message[2] = message[2].replace("-IpPlaceholder-",routes.get_ip(),1)
         self.displayMsgRaw(message)
 

@@ -3,6 +3,7 @@ import time
 import json
 import os
 import socket
+import copy
 
 WORK_DIR                = "/home/pi/ras/"
 fileDeviceCustomization = WORK_DIR + "dicts/deviceCustomization.json"
@@ -152,3 +153,10 @@ def getSettingsFromDeviceCustomization():
   settings["fileForMessages"]   = getOptionFromDeviceCustomization("fileForMessages"  , defaultValue= "messagesDic.json")
   settings["messagesDic"]       = getJsonData(WORK_DIR + "dicts/" + settings["fileForMessages"])
   settings["SSIDreset"]         = getOptionFromDeviceCustomization("SSIDreset"  , defaultValue= "__RAS__")
+
+def getMsgTranslated(textKey):
+  dict1 = settings["messagesDic"]
+  dict2 = dict1[textKey]
+  print("dict2 :", dict2)
+  msgTranslated = dict2[settings["language"]]       
+  return copy.deepcopy(msgTranslated)

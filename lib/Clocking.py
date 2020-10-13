@@ -4,7 +4,7 @@ import subprocess
 import logging
 import threading
 
-from . import routes
+from . import routes, Utils
 
 _logger = logging.getLogger(__name__)
 
@@ -85,32 +85,32 @@ class Clocking:
         if self.wifiActive():
             strength = int(self.get_status()["Signal level"])  # in dBm
             if strength >= 79:
-                self.wifi_m  = " " * 9 + "WiFi: " + "\u2022" * 1 + "o" * 4
+                self.wifi_m  = "WiFi: " + "\u2022" * 1 + "o" * 4
                 self.wifi = False
             elif strength >= 75:
-                self.wifi_m  = " " * 9 + "WiFi: " + "\u2022" * 2 + "o" * 3
+                self.wifi_m  = "WiFi: " + "\u2022" * 2 + "o" * 3
                 self.wifi = True
             elif strength >= 65:
-                self.wifi_m  = " " * 9 + "WiFi: " + "\u2022" * 3 + "o" * 2
+                self.wifi_m  = "WiFi: " + "\u2022" * 3 + "o" * 2
                 self.wifi = True
             elif strength >= 40:
-                self.wifi_m  = " " * 9 + "WiFi: " + "\u2022" * 4 + "o" * 1
+                self.wifi_m  = "WiFi: " + "\u2022" * 4 + "o" * 1
                 self.wifi = True
             else:
-                self.wifi_m  = " " * 9 + "WiFi: " + "\u2022" * 5
+                self.wifi_m  = "WiFi: " + "\u2022" * 5
                 self.wifi = True
         else:
-            self.wifi_m  = "    No WiFi signal"
+            self.wifi_m  = Utils.getMsgTranslated("noWiFiSignal")[2]
             self.wifi = False
         
         return self.wifi
 
     def odooReachable(self):
         if self.wifiStable() and self.Odoo.isOdooPortOpen():
-            self.odoo_m = "           Odoo OK"
+            self.odoo_m = Utils.getMsgTranslated("clockScreen_databaseOK")[2]
             self.odoo_conn = True
         else:
-            self.odoo_m = "NO Odoo connected"
+            self.odoo_m = Utils.getMsgTranslated("clockScreen_databaseNotConnected")[2]
             self.odoo_conn = False
             #_logger.warn(msg)
         _logger.debug(time.localtime(), "\n self.odoo_m ", self.odoo_m, "\n self.wifi_m ", self.wifi_m)        
