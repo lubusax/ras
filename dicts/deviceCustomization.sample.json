@@ -1,6 +1,7 @@
 {
   "language": "ENGLISH",
   "fileForMessages": "messagesDic.json",
+  "firmwareVersion":"v1.4.2",
   "manufacturingData": {
     "firmwareAtShipment": "v1.4.1",
     "productName": "RAS2",
@@ -12,13 +13,13 @@
   "odooConnectedAtLeastOnce": true,
   "odooParameters": {
     "admin_id": [
-      "7bdd55d3"
+      "ffffffff"
     ],
     "db": [
       "1"
     ],
     "odoo_host": [
-      "192.168.0.31"
+      "192.168.0.xx"
     ],
     "odoo_port": [
       "8069"
@@ -27,10 +28,10 @@
       "+01:00"
     ],
     "user_name": [
-      "luis"
+      "user"
     ],
     "user_password": [
-      "luis"
+      "psswd"
     ]
   },
   "showEmployeeName": "yes",

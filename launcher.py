@@ -8,7 +8,7 @@ format = "%(asctime)s %(pid)s %(levelname)s %(name)s: %(message)s"
 
 from dicts.ras_dic import PinsBuzzer, PinsDown, PinsOK
 from lib import Display, CardReader, PasBuz, Button
-from lib import OdooXMLrpc, Tasks
+from lib import OdooXMLrpc, Tasks, Utils
 
 import traceback
 from io import StringIO
@@ -16,6 +16,7 @@ from io import StringIO
 
 _logger = logging.getLogger(__name__)
 
+Utils.getSettingsFromDeviceCustomization() # initialize device customization settings/options
 Buzz = PasBuz.PasBuz(PinsBuzzer)
 Disp = Display.Display()
 Reader = CardReader.CardReader()

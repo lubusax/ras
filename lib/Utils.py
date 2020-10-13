@@ -4,6 +4,10 @@ import json
 import os
 import socket
 
+WORK_DIR                = "/home/pi/ras/"
+fileDeviceCustomization = WORK_DIR + "dicts/deviceCustomization.json"
+settings = {}
+
 class Timer:
   def __init__(self, howLong):
     self.reset()
@@ -104,15 +108,47 @@ def isPingable(address):
   return pingstatus
 
 def isIpPortOpen(ipPort): # you can not ping ports, you have to use connect_ex for ports
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    try:
-        canConnectResult = s.connect_ex(ipPort)
-        if canConnectResult == 0:
-            isOpen = True
-        else:
-            isOpen = False
-    except:
-        isOpen = False
-    finally:
-        s.close()
-    return isOpen
+  s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+  try:
+    canConnectResult = s.connect_ex(ipPort)
+    if canConnectResult == 0:
+      isOpen = True
+    else:
+      isOpen = False
+  except:
+    isOpen = False
+  finally:
+    s.close()
+  return isOpen
+
+def getOptionFromKey(dataDic, key):
+  try:
+    value = dataDic[key]
+    return value
+  except:
+    return None
+
+def getOptionFromDeviceCustomization(option, defaultValue):
+  try:
+    data = getJsonData(fileDeviceCustomization)
+    value = getOptionFromKey(data,option) or defaultValue
+    storeOptionInDeviceCustomization(option,value)
+    return value
+  except:
+    return None
+
+def storeOptionInDeviceCustomization(option,value):
+  try:
+    storeOptionInJsonFile(fileDeviceCustomization,option,value) # stores in file
+    settings[option]= value # stores on the running program
+    return True
+  except:
+    return False
+
+def getSettingsFromDeviceCustomization():
+  print("in get Settings")
+  settings["language"]          = getOptionFromDeviceCustomization("language"         , defaultValue= "ENGLISH")
+  settings["showEmployeeName"]  = getOptionFromDeviceCustomization("showEmployeeName" , defaultValue= "yes")
+  settings["fileForMessages"]   = getOptionFromDeviceCustomization("fileForMessages"  , defaultValue= "messagesDic.json")
+  settings["messagesDic"]       = getJsonData(WORK_DIR + "dicts/" + settings["fileForMessages"])
+  settings["SSIDreset"]         = getOptionFromDeviceCustomization("SSIDreset"  , defaultValue= "__RAS__")

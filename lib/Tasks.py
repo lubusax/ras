@@ -1,16 +1,11 @@
 import time
 import os
 import sys
-#import shelve
 import logging
 import threading
-#import signal
-#from urllib.request import urlopen
-from . import Clocking, routes
-from dicts.ras_dic import ask_twice, WORK_DIR, FIRMWARE_VERSION
-from dicts.textDisplay_dic import  SSID_reset, listOfLanguages
-from . import Utils
 
+from . import Clocking, Utils, routes
+from dicts.ras_dic import ask_twice, FIRMWARE_VERSION
 
 _logger = logging.getLogger(__name__)
 
@@ -25,7 +20,6 @@ class Tasks:
 		self.B_OK = Hardware[4]  # Button OK
 
 		self.Clock = Clocking.Clocking(Odoo, Hardware)
-		self.workdir = WORK_DIR
 		self.ask_twice = ask_twice  # list of tasks to ask 'are you sure?' upon selection
 		self.get_ip = routes.get_ip
 
@@ -75,8 +69,8 @@ class Tasks:
 		self.listOfYesNo =['yes', 'no']
 
 	 ########### LANGUAGES ####################
-		self.listOfLanguages = listOfLanguages
-
+		self.listOfLanguages = Utils.getOptionFromDeviceCustomization("listOfLanguages", ["ENGLISH"])
+		print("list of Languages: ", self.listOfLanguages)
 		self.maxLanguageOptions = len(self.listOfLanguages) - 1
 
 		self.currentLanguageOption = 0		
@@ -108,7 +102,7 @@ class Tasks:
 		self.Disp.display_msg("newAdmCardDefined")
 		routes.stop_server()
 
-		data = Utils.getJsonData(WORK_DIR + "dicts/data.json")
+		data = Utils.getJsonData(Utils.WORK_DIR + "dicts/data.json")
 		self.Odoo.adm = data["admin_id"][0]
 		self.Buzz.Play("back_to_menu")
 
@@ -214,7 +208,7 @@ class Tasks:
 			if self.B_OK.pressed:
 				self.Buzz.Play("OK")
 				self.Disp.language = currentLanguageOption
-				Utils.storeOptionInJsonFile(self.Disp.fileDeviceCustomization,"language",currentLanguageOption)
+				Utils.storeOptionInDeviceCustomization("language",currentLanguageOption)
 			elif self.B_Down.pressed:
 				goOneLanguageDownInTheMenu()
 		
@@ -240,7 +234,7 @@ class Tasks:
 		def doFirmwareUpdate():
 			_logger.debug("Updating Firmware")
 			self.Disp.display_msg("update")
-			os.chdir(self.workdir)
+			os.chdir(Utils.WORK_DIR)
 			os.system("sudo git fetch origin v1.4-release")
 			os.system("sudo git reset --hard origin/v1.4-release")
 			self.Buzz.Play("OK")
@@ -276,7 +270,7 @@ class Tasks:
 		_logger.debug("Reset WI-FI")
 		self.Disp.display_msg("configure_wifi")
 		os.system("sudo rm -R /etc/NetworkManager/system-connections/*")
-		os.system("sudo wifi-connect --portal-ssid " + SSID_reset)
+		os.system("sudo wifi-connect --portal-ssid " + Utils.settings["SSIDreset"])
 		self.Buzz.Play("back_to_menu")
 		self.nextTask = self.defaultNextTask
 
@@ -312,12 +306,12 @@ class Tasks:
 			self.Odoo.set_params()
 
 			if self.Odoo.uid:
-				self.Disp.display_msg("gotOdooUID")
+				self.Disp.display_msg("gotUID")
 				self.Buzz.Play("OK")
 				self.Odoo.storeOdooParamsInDeviceCustomizationFile()
 				self.nextTask = self.defaultNextTask
 			else:
-				self.Disp.display_msg("noOdooUID")
+				self.Disp.display_msg("noUID")
 				self.Buzz.Play("FALSE")
 				self.nextTask = "resetOdoo"
 
@@ -440,7 +434,7 @@ class Tasks:
 
 		self.Buzz.Play("OK")
 		self.Disp.showEmployeeName = textCurrentOption
-		Utils.storeOptionInJsonFile(self.Disp.fileDeviceCustomization,"showEmployeeName",textCurrentOption)
+		Utils.storeOptionInDeviceCustomization("showEmployeeName",textCurrentOption)
 		
 		Utils.setButtonsToNotPressed(self.B_OK,self.B_Down)
 		self.nextTask = self.defaultNextTask

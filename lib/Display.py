@@ -5,42 +5,22 @@ import copy
 from PIL import Image, ImageFont
 from luma.core.render import canvas
 from .demo_opts import get_device
-from dicts.ras_dic import WORK_DIR, display_driver
-from dicts.textDisplay_dic import messages_dic
+from dicts.ras_dic import display_driver
 from . import routes
 from . import Utils
 
-
 _logger = logging.getLogger(__name__)
-
 
 class Display:
     def __init__(self):
-        self.font_ttf = WORK_DIR + "fonts/Orkney.ttf"
-        self.img_path = WORK_DIR + "images/"
+        self.font_ttf = Utils.WORK_DIR + "fonts/Orkney.ttf"
+        self.img_path = Utils.WORK_DIR + "images/"
         self.device = get_device(("-d", display_driver))
         _logger.debug("Display Class Initialized")
         self.font1 = ImageFont.truetype(self.font_ttf, 30)
         self.font2 = ImageFont.truetype(self.font_ttf, 14)
         self.font3 = ImageFont.truetype(self.font_ttf, 22)
-        self.fileDeviceCustomization = WORK_DIR + "dicts/deviceCustomization.json"
-        self.getSettingsFromFile()
-        self.getMessagesDic()
-    
-    def getMessagesDic(self):
-        self.messagesDic = messages_dic
 
-    def getSettingsFromFile(self):
-        data = Utils.getJsonData(self.fileDeviceCustomization)
-        if data:
-            self.language           = data["language"]
-            self.showEmployeeName   = data["showEmployeeName"]
-            return True
-        else:
-            self.language           = "ENGLISH"
-            self.showEmployeeName   = "yes"
-            return False
-    
     def _display_time(self, wifi_quality, odoo_m):
         with canvas(self.device) as draw:
             hour = time.strftime("%H:%M", time.localtime())
@@ -94,20 +74,22 @@ class Display:
         _logger.debug("Displaying message: " + text)
 
     def getMsgTranslated(self, textKey):
-        dictWithAllLanguages = self.messagesDic.get(textKey)
-        msgTranslated = dictWithAllLanguages.get(self.language)       
+        dictWithAllLanguages = Utils.settings["messagesDic"].get(textKey)
+        msgTranslated = dictWithAllLanguages.get(Utils.settings["language"])       
         return copy.deepcopy(msgTranslated)
 
     def display_msg(self, textKey, employee_name = None):
         message = self.getMsgTranslated(textKey)
         if '-EmployeePlaceholder-' in message[2]:
-            if employee_name and self.showEmployeeName == "yes":
+            if employee_name and Utils.settings["showEmployeeName"] == "yes":
                 employeeName = employee_name.split(" ",1)
                 firstName = employeeName[0][0:14]
                 lastName = employeeName[1][0:14]         
                 message[2] = message[2].replace('-EmployeePlaceholder-',firstName+"\n"+lastName,1)
             else:
                 message[2] =  "\n"+ message[2].replace('-EmployeePlaceholder-',"")
+        if '-SSIDresetPlaceholder-' in message[2]:
+            message[2] =  message[2].replace('-SSIDresetPlaceholder-',Utils.settings["SSIDreset"])
         self.displayMsgRaw(message)
     
     def displayWithIP(self, textKey):

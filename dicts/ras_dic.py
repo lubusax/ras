@@ -1,10 +1,6 @@
 # FIRMWARE Version
 FIRMWARE_VERSION = "v1.4.1"
 
-# reference to find different files in
-# the memory of the device
-WORK_DIR = "/home/pi/ras/"
-
 # driver to be used by luma.core
 display_driver = "sh1106"
 

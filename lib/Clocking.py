@@ -1,18 +1,12 @@
 import time
-#import json # needed?
 import os
 import subprocess
 import logging
-#import random
 import threading
-#from pythonwifi.iwlibs import Wireless
 
-from dicts.ras_dic import WORK_DIR
-from dicts.textDisplay_dic import  SSID_reset
 from . import routes
 
 _logger = logging.getLogger(__name__)
-
 
 class Clocking:
     def __init__(self, odoo, hardware):

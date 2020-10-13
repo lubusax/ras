@@ -10,7 +10,7 @@
       {
         "ENGLISH": [[5, 10], 15, "Welcome to the\nRFID attendance\nsystem"],
         "ESPAÑOL": [[0, 0], 14, "Sistema de\nControl\nde Presencia\npor RFID\n\n-----------------"],
-        "FRANÇAIS": [[0, 0], 14, "Bienvenue sur\nsur votre badgeuse\nconnectée à Odoo"]
+        "FRANÇAIS": [[0, 0], 14, "Bienvenue sur\nsur votre badgeuse\nconnectée à EtRH"]
       },
 
   "wait":
@@ -75,16 +75,16 @@
 
   "comm_failed":
       {
-        "ENGLISH": [[0, 6], 15,"Error while\ncommunicating\nwith Odoo\n\n-----------------"],
-        "ESPAÑOL": [[0, 6], 15,"Error mientras\ncomunicando\ncon Odoo\n\n-----------------"],
-        "FRANÇAIS": [[0, 6], 15,"Echec de\nla connexion\navec Odoo\n\n-----------------"]
+        "ENGLISH": [[0, 6], 15,"Error while\ncommunicating\nwith EtRH\n\n-----------------"],
+        "ESPAÑOL": [[0, 6], 15,"Error mientras\ncomunicando\ncon EtRH\n\n-----------------"],
+        "FRANÇAIS": [[0, 6], 15,"Echec de\nla connexion\navec EtRH\n\n-----------------"]
       },
 
   "odoo_failed":
       {
-        "ENGLISH": [[0, 0], 14,"Communication\nwith Odoo FAILED,\nplease check\nthe parameters\n-----------------"],
-        "ESPAÑOL": [[0, 0], 14,"La comunicación\ncon Odoo ha fallado\nPor favor, revise\nlos parámetros\n-----------------"],
-        "FRANÇAIS": [[0, 0], 14,"Echec de la connexion\navec le serveur Odoo\nVeuillez, vérifier\nvos paramètres\n----------------"]
+        "ENGLISH": [[0, 0], 14,"Communication\nwith EtRH FAILED,\nplease check\nthe parameters\n-----------------"],
+        "ESPAÑOL": [[0, 0], 14,"La comunicación\ncon EtRH ha fallado\nPor favor, revise\nlos parámetros\n-----------------"],
+        "FRANÇAIS": [[0, 0], 14,"Echec de la connexion\navec le serveur EtRH\nVeuillez, vérifier\nvos paramètres\n----------------"]
       },
 
   "no_wifi":
@@ -96,16 +96,16 @@
 
   "gotUID":
       {
-        "ENGLISH": [[0, 6], 15,"Communication\nwith Odoo\nestablished\n\n-----------------"],
-        "ESPAÑOL": [[0, 6], 15,"Communicación\ncon Odoo\nestablecida\n\n-----------------"],
-        "FRANÇAIS": [[0, 6], 15,"Connexion établie\navec votre\nserveur Odoo\n\n-----------------"]  
+        "ENGLISH": [[0, 6], 15,"Communication\nwith EtRH\nestablished\n\n-----------------"],
+        "ESPAÑOL": [[0, 6], 15,"Communicación\ncon EtRH\nestablecida\n\n-----------------"],
+        "FRANÇAIS": [[0, 6], 15,"Connexion établie\navec votre\nserveur EtRH\n\n-----------------"]  
       },
 
   "noUID":
       {
-        "ENGLISH": [[0,6], 16, "Could not get\nan Odoo\nUID\n---------------"],
-        "ESPAÑOL": [[0,6], 15,"No fué posible\nconseguir una\nUID en Odoo\n\n-----------------"],
-        "FRANÇAIS": [[0,6], 15,"No fué posible\nconseguir una\nUID en Odoo\n\n-----------------"]  
+        "ENGLISH": [[0,6], 16, "Could not get\nan EtRH\nUID\n---------------"],
+        "ESPAÑOL": [[0,6], 15,"No fué posible\nconseguir una\nUID en EtRH\n\n-----------------"],
+        "FRANÇAIS": [[0,6], 15,"No fué posible\nconseguir una\nUID en EtRH\n\n-----------------"]  
       },
 
   "configure_wifi":
@@ -195,9 +195,9 @@
 
   "resetOdoo":
     {
-      "ENGLISH": [[0, 6], 15,"press OK to\nRESET the Odoo\nparameters\n\n-----------------"],
-      "ESPAÑOL": [[0, 0], 14,"pulse OK para\nresetear los\nparámetros\nde Odoo\n\n-----------------"],
-      "FRANÇAIS": [[0, 0], 14,"appuyez sur OK\npour réinitialiser\nles paramètres\nd'Odoo\n\n-----------------"]
+      "ENGLISH": [[0, 6], 15,"press OK to\nRESET the EtRH\nparameters\n\n-----------------"],
+      "ESPAÑOL": [[0, 0], 14,"pulse OK para\nresetear los\nparámetros\nde EtRH\n\n-----------------"],
+      "FRANÇAIS": [[0, 0], 14,"appuyez sur OK\npour réinitialiser\nles paramètres\nd'EtRH\n\n-----------------"]
     },  
 
   "getNewAdminCard":
@@ -251,8 +251,8 @@
 
   "browseForNewOdooParams":
       {
-        "ENGLISH": [[0, 0], 14,"Browse to\n-IpPlaceholder-:3000\nto introduce new\nOdoo parameters\n-----------------\n"],
-        "ESPAÑOL": [[0, 0], 14,"Navege a\n-IpPlaceholder-:3000\npara definir nuevos\nParámetros Odoo\n-----------------\n"],
-        "FRANÇAIS": [[0, 0], 14,"Ouvrez l\"URL\n-IpPlaceholder-:3000\npour definir les\nparamètres Odoo\n-----------------\n"]
+        "ENGLISH": [[0, 0], 14,"Browse to\n-IpPlaceholder-:3000\nto introduce new\nEtRH parameters\n-----------------\n"],
+        "ESPAÑOL": [[0, 0], 14,"Navege a\n-IpPlaceholder-:3000\npara definir nuevos\nParámetros EtRH\n-----------------\n"],
+        "FRANÇAIS": [[0, 0], 14,"Ouvrez l\"URL\n-IpPlaceholder-:3000\npour definir les\nparamètres EtRH\n-----------------\n"]
       }     
 }

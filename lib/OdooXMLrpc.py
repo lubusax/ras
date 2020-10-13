@@ -4,7 +4,6 @@ import json
 import logging
 
 from dicts import tz_dic
-from dicts.ras_dic import WORK_DIR
 
 import xmlrpc.client as xmlrpclib
 
@@ -14,9 +13,7 @@ _logger = logging.getLogger(__name__)
 
 class OdooXMLrpc:
     def __init__(self):
-        self.workdir                    = WORK_DIR
-        self.datajson                   = self.workdir + "dicts/data.json"
-        self.fileDeviceCustomization    = self.workdir + "dicts/deviceCustomization.json"
+        self.datajson                   = Utils.WORK_DIR + "dicts/data.json"
         self.set_params()
         _logger.debug("Odoo XMLrpc Class Initialized")
 
@@ -121,15 +118,15 @@ class OdooXMLrpc:
             os.system("sudo rm " + self.datajson)
     
     def storeOdooParamsInDeviceCustomizationFile(self):
-        deviceCustomizationData = Utils.getJsonData(self.fileDeviceCustomization)
+        deviceCustomizationData = Utils.getJsonData(Utils.fileDeviceCustomization)
         deviceCustomizationData["odooParameters"] = self.j_data
         self.odooConnectedAtLeastOnce = True
         deviceCustomizationData["odooConnectedAtLeastOnce"] = self.odooConnectedAtLeastOnce
-        Utils.storeJsonData(self.fileDeviceCustomization,deviceCustomizationData)
+        Utils.storeJsonData(Utils.fileDeviceCustomization,deviceCustomizationData)
         _logger.debug("wrote to deviceCustomizationData.json: ",self.j_data)
     
     def getOdooParamsFromDeviceCustomizationFile(self):
-        deviceCustomizationData = Utils.getJsonData(self.fileDeviceCustomization)
+        deviceCustomizationData = Utils.getJsonData(Utils.fileDeviceCustomization)
         self.j_data = deviceCustomizationData["odooParameters"]
         self.odooConnectedAtLeastOnce = deviceCustomizationData["odooConnectedAtLeastOnce"]
         Utils.storeJsonData(self.datajson, self.j_data)
