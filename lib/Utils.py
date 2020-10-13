@@ -156,7 +156,6 @@ def getSettingsFromDeviceCustomization():
 
 def getMsgTranslated(textKey):
   dict1 = settings["messagesDic"]
-  dict2 = dict1[textKey]
-  print("dict2 :", dict2)
+  dict2 = settings["messagesDic"][textKey]
   msgTranslated = dict2[settings["language"]]       
   return copy.deepcopy(msgTranslated)
