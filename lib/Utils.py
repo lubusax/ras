@@ -4,11 +4,22 @@ import json
 import os
 import socket
 import copy
-
+import functools
 
 WORK_DIR                = "/home/pi/ras/"
 fileDeviceCustomization = WORK_DIR + "dicts/deviceCustomization.json"
 settings = {}
+
+def timer(func):
+    @functools.wraps(func)
+    def wrapper_timer(*args, **kwargs):
+        tic = time.perf_counter()
+        value = func(*args, **kwargs)
+        toc = time.perf_counter()
+        elapsed_time = toc - tic
+        print("Elapsed time: {1:0.4f} seconds - Function: {0}".format(func, elapsed_time))
+        return value
+    return wrapper_timer
 
 class Timer:
   def __init__(self, howLong):
@@ -73,6 +84,7 @@ def setButtonsToNotPressed(button1,button2):
   if button1: button1.pressed=False
   if button2: button2.pressed=False
 
+#@timer
 def getJsonData(filePath):
   try:
     with open(filePath) as f:
@@ -155,11 +167,19 @@ def getSettingsFromDeviceCustomization():
   settings["messagesDic"]       = getJsonData(WORK_DIR + "dicts/" + settings["fileForMessages"])
   settings["SSIDreset"]         = getOptionFromDeviceCustomization("SSIDreset"  , defaultValue= "__RAS__")
 
+def getMsg(textKey):
+  try:
+    return settings["messagesDic"][textKey] 
+  except:
+    return None
+
 def getMsgTranslated(textKey):
-  dict1 = settings["messagesDic"]
-  dict2 = settings["messagesDic"][textKey]
-  msgTranslated = dict2[settings["language"]]       
+  msgTranslated = getMsg(textKey)[settings["language"]]       
   return copy.deepcopy(msgTranslated)
 
 
-
+def getListOfLanguages(defaultListOfLanguages = ["ENGLISH"]):
+  try:
+    return getMsg("listOfLanguages")
+  except:
+    return defaultListOfLanguages

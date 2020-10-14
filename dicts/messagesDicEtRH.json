@@ -1,4 +1,10 @@
 {
+  "listOfLanguages": [
+    "ENGLISH",
+    "ESPA\u00d1OL",
+    "FRAN\u00c7AIS"
+  ],
+
   " ":
       {
         "ENGLISH": [[0, 0], 20," "],
@@ -32,7 +38,7 @@
       {
         "ENGLISH": [[0, 6], 16,"CHECK OUT >>>\n-EmployeePlaceholder-\n\n\n-------------"],
         "ESPAÑOL": [[0, 6], 16,"...... Salida >>>>\n-EmployeePlaceholder-\n\n\n-------------"],
-        "FRANÇAIS": [[0, 6], 16,"AU REVOIR >>>>\n-EmployeePlaceholder-\n\n\n-------------"]
+        "FRANÇAIS": [[0, 6], 16,"AU REVOIR >>>\n-EmployeePlaceholder-\n\n\n-------------"]
       },
 
   "FALSE":

@@ -72,6 +72,7 @@ class Display:
             draw.multiline_text(origin, text, fill="white", font=font, align="center")
         _logger.debug("Displaying message: " + text)
 
+    #@Utils.timer
     def display_msg(self, textKey, employee_name = None):
         message = Utils.getMsgTranslated(textKey)
         if '-EmployeePlaceholder-' in message[2]:

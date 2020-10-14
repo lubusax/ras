@@ -10,8 +10,6 @@ _logger = logging.getLogger(__name__)
 
 class Clocking:
     def __init__(self, odoo, hardware):
-        self.card = False  # currently swipped card code
-
         self.Odoo = odoo
         self.Buzz = hardware[0]  # Passive Buzzer
         self.Disp = hardware[1]  # Display
@@ -26,19 +24,10 @@ class Clocking:
         self.wifi = False
         #self.wifi_con = Wireless("wlan0")
 
-        self.card_logging_time_min = 2
-        # minimum amount of seconds allowed for
-        # the card logging process
-        # making this time smaller means the terminal
-        # is sooner ready to process the next card
-        # making this time bigger allows
-        # the user more time to read the message
-        # shown in the display
+        self.timeToDisplayResult = 1.4 # in seconds
 
-        self.msg = False
-        # Message that is used to Play a Melody or
-        # Display which kind of Event happened: for example check in,
-        # check out, communication with odoo not possible ...
+        self.msg = False # determines Melody to play and/or Text to display depending on Event happened: for example check in,
+                        # check out, communication with odoo not possible ...
 
         self.checkodoo_wifi = True
         self.odooStatusMessage         = " "
@@ -83,6 +72,7 @@ class Clocking:
                     resultdict[datumname] = datum
         return resultdict
 
+    #@Utils.timer
     def wifiStable(self):
         if self.wifiActive():
             strength = int(self.get_status()["Signal level"])  # in dBm
@@ -107,6 +97,7 @@ class Clocking:
         
         return self.wifi
 
+    #@Utils.timer
     def isOdooReachable(self):
         if self.wifiStable() and self.Odoo.isOdooPortOpen():
             self.odooStatusMessage = Utils.getMsgTranslated("clockScreen_databaseOK")[2]
@@ -118,57 +109,45 @@ class Clocking:
         _logger.debug(time.localtime(), "\n self.odooStatusMessage ", self.odooStatusMessage, "\n self.wifiStatusMessage ", self.wifiStatusMessage)        
         return self.odooReachable
 
-    def clockSync(self):
-
-        if self.odooReachable:
-            try:
-                res = self.Odoo.checkAttendance(self.card)
-                if res:
-                    _logger.debug("response odoo - check attendance ", res)
-                    self.employeeName = res["employee_name"]
-                    self.msg = res["action"]
-                    _logger.debug(res)
-                else:
-                    self.msg = "comm_failed"
-            except Exception as e:
-                _logger.exception(e) # Reset parameters for Odoo because fails when start and odoo is not running
+    #@Utils.timer
+    def doTheClocking(self):
+        try:
+            res = self.Odoo.checkAttendance(self.Reader.card)
+            if res:
+                _logger.debug("response odoo - check attendance ", res)
+                self.employeeName = res["employee_name"]
+                self.msg = res["action"]
+                _logger.debug(res)
+            else:
+                self.msg = "comm_failed"
+        except Exception as e:
+            _logger.exception(e) # Reset parameters for Odoo because fails when start and odoo is not running
+            if isOdooReachable():
+                self.msg = "ContactAdm"  # No Odoo Connection: Contact Your Admin
+            else:
                 self.Odoo.set_params()
                 self.msg = "comm_failed"
-        else:
-            self.msg = "ContactAdm"  # No Odoo Connection: Contact Your Admin
+            #print("isOdooReachable: ", self.odooReachable )
         _logger.info("Clocking sync returns: %s" % self.msg)
 
+    #@Utils.timer
     def card_logging(self):
+        self.Disp.display_msg("connecting")
         if not self.Odoo.uid:
-            self.Odoo.set_params()  # be sure that always uid is set to
-            # the last Odoo status (if connected)
-            self.msg = "gotUID"
-            self.employeeName = None
+            self.msg = "ContactAdm"  # There was no successful Odoo Connection (no uid) since turning the device on:
+                                     # Contact Your Admin because Odoo is down , the message is changed eventually later
+            self.Odoo.set_params()  # be sure that always uid is set to the last Odoo status (if connected)
 
-        self.card = self.Reader.card
-        begin_card_logging = time.perf_counter() # store the time when the card logging process begin
-        if self.card:            
-            self.Disp.display_msg("connecting")
-            if self.isOdooReachable():
-                self.clockSync()
+        if self.Odoo.uid: # check if the uid was set after running SetParams
+            if self.wifiStable():
+                self.doTheClocking()
             else:
-                self.msg = "ContactAdm"
-        else:
-            self.msg = "swipecard"
+                self.msg = "no_wifi"
         
-        self.Disp.display_msg(self.msg, self.employeeName)  # clocking message
-        self.Buzz.Play(self.msg)  # clocking acoustic feedback
+        self.Disp.display_msg(self.msg, self.employeeName)
+        self.Buzz.Play(self.msg)
 
-        rest_time = self.card_logging_time_min - (
-            time.perf_counter() - begin_card_logging
-        )
-        # calculating the minimum rest time
-        # allowed for the user to read the display
-        if rest_time < 0:
-            rest_time = 0  # the rest time can not be negative
-        if rest_time > self.card_logging_time_min:
-            rest_time = self.card_logging_time_min
-
-        time.sleep(rest_time)
+        time.sleep(self.timeToDisplayResult)
         self.Disp._display_time(self.wifiStatusMessage, self.odooStatusMessage)
+
 

@@ -69,8 +69,7 @@ class Tasks:
 		self.listOfYesNo =['yes', 'no']
 
 	 ########### LANGUAGES ####################
-		self.listOfLanguages = Utils.getOptionFromDeviceCustomization("listOfLanguages", ["ENGLISH"])
-		print("list of Languages: ", self.listOfLanguages)
+		self.listOfLanguages = Utils.getListOfLanguages(["ENGLISH"])
 		self.maxLanguageOptions = len(self.listOfLanguages) - 1
 
 		self.currentLanguageOption = 0		

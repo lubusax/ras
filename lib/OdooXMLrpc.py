@@ -18,9 +18,11 @@ class OdooXMLrpc:
         self.set_params()
         _logger.debug("Odoo XMLrpc Class Initialized")
 
-    def set_params(self):
+    #@Utils.timer
+    def set_params(self):       
         _logger.debug("Params config is %s " % os.path.isfile(self.datajson))
         self.j_data = Utils.getJsonData(self.datajson)
+
         if self.j_data:
             self.odooConnectedAtLeastOnce = True
         else:
@@ -49,7 +51,7 @@ class OdooXMLrpc:
                 self.url_template += ":%s" % self.port
             
             self.odooIpPort = (self.host, int(self.port))
-            self.uid = self._get_user_id()
+            self.uid = self.getUserID()
         else:
             self.ensureNoDataJsonFile()
 
@@ -72,18 +74,19 @@ class OdooXMLrpc:
 
         _logger.debug("After set params method, Odoo UID : ", self.uid)
 
-    def _get_object_facade(self, url):
+    def getServerProxy(self, url):
         try:
-            object_facade = xmlrpclib.ServerProxy(self.url_template + str(url))
-            return object_facade
+            serverProxy = xmlrpclib.ServerProxy(self.url_template + str(url))
+            return serverProxy
         except Exception as e:
             _logger.exception(e)
             return False
 
-    def _get_user_id(self):
+    #@Utils.timer
+    def getUserID(self):
         try:
-            login_facade = self._get_object_facade("/xmlrpc/common")
-            user_id = login_facade.login(self.db, self.user, self.pswd)
+            loginServerProxy = self.getServerProxy("/xmlrpc/common")
+            user_id = loginServerProxy.login(self.db, self.user, self.pswd)
             if user_id:
                 return user_id
             return None
@@ -94,15 +97,17 @@ class OdooXMLrpc:
             _logger.exception(e)
             return None
     
+    #@Utils.timer
     def isOdooPortOpen(self):
         return Utils.isIpPortOpen(self.odooIpPort)
 
+    #@Utils.timer
     def checkAttendance(self, card):
         try:
-            object_facade = self._get_object_facade("/xmlrpc/object")
-            if object_facade:
-                #socket.setdefaultimeout(10)
-                res = object_facade.execute(
+            serverProxy = self.getServerProxy("/xmlrpc/object")
+            if serverProxy:
+                serverProxy.transport.connection.timeout = 2
+                res = serverProxy.execute(
                     self.db,
                     self.uid,
                     self.pswd,
@@ -110,14 +115,15 @@ class OdooXMLrpc:
                     "register_attendance",
                     card,
                 )
-                #socket.setdefaulttimeout(None)
             return res
         except Exception as e:
             _logger.exception(e)
             return False
-
-
-
+        finally:
+            serverProxy.transport.connection.timeout = None
+        
+        print("-"*60)
+        print()
 
     def ensureNoDataJsonFile(self):
         if os.path.isfile(self.datajson):
