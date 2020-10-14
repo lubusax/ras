@@ -145,18 +145,18 @@ class Tasks:
 		def threadEvaluateReachability(period):
 				_logger.debug('Thread Get Messages started')
 				while not exitFlag.isSet():
-						self.Clock.odooReachable()   # Odoo and Wifi Status Messages are updated
+						self.Clock.isOdooReachable()   # Odoo and Wifi Status Messages are updated
 						exitFlag.wait(period)
 				_logger.debug('Thread Get Messages stopped')
 
 		def threadDisplayClock(period):
-			self.Clock.odooReachable() 
+			self.Clock.isOdooReachable() 
 			_logger.debug('Thread Display Clock started')
 			minutes = False
 			while not exitFlag.isSet():
 				if not (time.localtime().tm_min == minutes): 
 					minutes = time.localtime().tm_min 
-					self.Disp._display_time(self.Clock.wifi_m, self.Clock.odoo_m) 
+					self.Disp._display_time(self.Clock.wifiStatusMessage, self.Clock.odooStatusMessage) 
 				exitFlag.wait(period)
 			_logger.debug('Thread Display Clock stopped')
  

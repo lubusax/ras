@@ -35,6 +35,7 @@ def mainLoop():
 
         while True:
             if Tasks.nextTask:
+                Disp.display_msg("connecting")
                 Tasks.executeNextTask()
             else:
                 Tasks.chooseTaskFromMenu()

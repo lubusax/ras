@@ -41,8 +41,10 @@ class Clocking:
         # check out, communication with odoo not possible ...
 
         self.checkodoo_wifi = True
-        self.odoo_m         = " "
-        self.wifi_m         = " "
+        self.odooStatusMessage         = " "
+        self.wifiStatusMessage         = " "
+        self.employeeName   = None
+        self.odooReachable  = False
         _logger.debug('Clocking Class Initialized')
 
     def wifiActive(self):
@@ -85,56 +87,51 @@ class Clocking:
         if self.wifiActive():
             strength = int(self.get_status()["Signal level"])  # in dBm
             if strength >= 79:
-                self.wifi_m  = "WiFi: " + "\u2022" * 1 + "o" * 4
+                self.wifiStatusMessage  = "WiFi: " + "\u2022" * 1 + "o" * 4
                 self.wifi = False
             elif strength >= 75:
-                self.wifi_m  = "WiFi: " + "\u2022" * 2 + "o" * 3
+                self.wifiStatusMessage  = "WiFi: " + "\u2022" * 2 + "o" * 3
                 self.wifi = True
             elif strength >= 65:
-                self.wifi_m  = "WiFi: " + "\u2022" * 3 + "o" * 2
+                self.wifiStatusMessage  = "WiFi: " + "\u2022" * 3 + "o" * 2
                 self.wifi = True
             elif strength >= 40:
-                self.wifi_m  = "WiFi: " + "\u2022" * 4 + "o" * 1
+                self.wifiStatusMessage  = "WiFi: " + "\u2022" * 4 + "o" * 1
                 self.wifi = True
             else:
-                self.wifi_m  = "WiFi: " + "\u2022" * 5
+                self.wifiStatusMessage  = "WiFi: " + "\u2022" * 5
                 self.wifi = True
         else:
-            self.wifi_m  = Utils.getMsgTranslated("noWiFiSignal")[2]
+            self.wifiStatusMessage  = Utils.getMsgTranslated("noWiFiSignal")[2]
             self.wifi = False
         
         return self.wifi
 
-    def odooReachable(self):
+    def isOdooReachable(self):
         if self.wifiStable() and self.Odoo.isOdooPortOpen():
-            self.odoo_m = Utils.getMsgTranslated("clockScreen_databaseOK")[2]
-            self.odoo_conn = True
+            self.odooStatusMessage = Utils.getMsgTranslated("clockScreen_databaseOK")[2]
+            self.odooReachable = True
         else:
-            self.odoo_m = Utils.getMsgTranslated("clockScreen_databaseNotConnected")[2]
-            self.odoo_conn = False
+            self.odooStatusMessage = Utils.getMsgTranslated("clockScreen_databaseNotConnected")[2]
+            self.odooReachable = False
             #_logger.warn(msg)
-        _logger.debug(time.localtime(), "\n self.odoo_m ", self.odoo_m, "\n self.wifi_m ", self.wifi_m)        
-        return self.odoo_conn
+        _logger.debug(time.localtime(), "\n self.odooStatusMessage ", self.odooStatusMessage, "\n self.wifiStatusMessage ", self.wifiStatusMessage)        
+        return self.odooReachable
 
-    def clock_sync(self):
-        if not self.Odoo.uid:
-            self.Odoo.set_params()  # be sure that always uid is set to
-            # the last Odoo status (if connected)
-        if self.Odoo.isOdooPortOpen:
-            self.Disp.display_msg("connecting")
+    def clockSync(self):
+
+        if self.odooReachable:
             try:
                 res = self.Odoo.check_attendance(self.card)
                 if res:
                     _logger.debug("response odoo - check attendance ", res)
-                    self.employee_name = res["employee_name"]
+                    self.employeeName = res["employee_name"]
                     self.msg = res["action"]
                     _logger.debug(res)
                 else:
                     self.msg = "comm_failed"
             except Exception as e:
-                _logger.exception(e)
-                # Reset parameters for Odoo connection because fails
-                # when start and odoo is not running
+                _logger.exception(e) # Reset parameters for Odoo because fails when start and odoo is not running
                 self.Odoo.set_params()
                 self.msg = "comm_failed"
         else:
@@ -142,28 +139,36 @@ class Clocking:
         _logger.info("Clocking sync returns: %s" % self.msg)
 
     def card_logging(self):
-        self.card = self.Reader.card
-        if self.card:
-            begin_card_logging = time.perf_counter()
-            # store the time when the card logging process begin
+        if not self.Odoo.uid:
+            self.Odoo.set_params()  # be sure that always uid is set to
+            # the last Odoo status (if connected)
+            self.msg = "gotUID"
+            self.employeeName = None
 
-            if self.wifiStable():
-                self.clock_sync()
-                self.odooReachable()                
+        self.card = self.Reader.card
+        begin_card_logging = time.perf_counter() # store the time when the card logging process begin
+        if self.card:            
+            self.Disp.display_msg("connecting")
+            if self.isOdooReachable():
+                self.clockSync()
             else:
                 self.msg = "ContactAdm"
+        else:
+            self.msg = "swipecard"
+        
+        self.Disp.display_msg(self.msg, self.employeeName)  # clocking message
+        self.Buzz.Play(self.msg)  # clocking acoustic feedback
 
-            self.Disp.display_msg(self.msg, self.employee_name)  # clocking message
-            self.Buzz.Play(self.msg)  # clocking acoustic feedback
+        rest_time = self.card_logging_time_min - (
+            time.perf_counter() - begin_card_logging
+        )
+        # calculating the minimum rest time
+        # allowed for the user to read the display
+        if rest_time < 0:
+            rest_time = 0  # the rest time can not be negative
+        if rest_time > self.card_logging_time_min:
+            rest_time = self.card_logging_time_min
 
-            rest_time = self.card_logging_time_min - (
-                time.perf_counter() - begin_card_logging
-            )
-            # calculating the minimum rest time
-            # allowed for the user to read the display
-            if rest_time < 0:
-                rest_time = 0  # the rest time can not be negative
-
-            time.sleep(rest_time)
-            self.Disp._display_time(self.wifi_m, self.odoo_m)
+        time.sleep(rest_time)
+        self.Disp._display_time(self.wifiStatusMessage, self.odooStatusMessage)
 
