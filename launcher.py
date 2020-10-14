@@ -17,7 +17,6 @@ from io import StringIO
 _logger = logging.getLogger(__name__)
 
 Utils.getSettingsFromDeviceCustomization() # initialize device customization settings/options
-Utils.registerSignalTimeoutHandler()
 
 Buzz = PasBuz.PasBuz(PinsBuzzer)
 Disp = Display.Display()

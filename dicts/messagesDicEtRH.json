@@ -24,7 +24,7 @@
       {
         "ENGLISH": [[0, 6], 16,">>> CHECK IN ...\n-EmployeePlaceholder-\n\n\n-------------"],
         "ESPAÑOL": [[0, 6], 16,">>> Entrada .....\n-EmployeePlaceholder-\n\n\n-------------"],
-        "FRANÇAIS": [[0, 6], 16,">>> BIENVENUE .....\n-EmployeePlaceholder-\n\n\n-------------"]
+        "FRANÇAIS": [[0, 6], 16,">>> BIENVENUE\n-EmployeePlaceholder-\n\n\n-------------"]
       },
 
 

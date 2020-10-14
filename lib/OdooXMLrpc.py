@@ -6,6 +6,7 @@ import logging
 from dicts import tz_dic
 
 import xmlrpc.client as xmlrpclib
+import socket
 
 from . import Utils
 
@@ -97,10 +98,10 @@ class OdooXMLrpc:
         return Utils.isIpPortOpen(self.odooIpPort)
 
     def checkAttendance(self, card):
-        Utils.setTimeout(1)
         try:
             object_facade = self._get_object_facade("/xmlrpc/object")
             if object_facade:
+                #socket.setdefaultimeout(10)
                 res = object_facade.execute(
                     self.db,
                     self.uid,
@@ -109,15 +110,12 @@ class OdooXMLrpc:
                     "register_attendance",
                     card,
                 )
+                #socket.setdefaulttimeout(None)
             return res
-        except UtilsTimeout as timeoutMessage:
-            print("in CheckAttendance ", timeoutMessage)
-            return False
         except Exception as e:
             _logger.exception(e)
             return False
-        finally:
-            Utils.cancelTimeout()
+
 
 
 
