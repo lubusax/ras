@@ -4,10 +4,12 @@ import json
 import os
 import socket
 import copy
+import signal
 
 WORK_DIR                = "/home/pi/ras/"
 fileDeviceCustomization = WORK_DIR + "dicts/deviceCustomization.json"
 settings = {}
+timeout = 5
 
 class Timer:
   def __init__(self, howLong):
@@ -159,3 +161,22 @@ def getMsgTranslated(textKey):
   dict2 = settings["messagesDic"][textKey]
   msgTranslated = dict2[settings["language"]]       
   return copy.deepcopy(msgTranslated)
+
+class UtilsTimeout(Exception):
+  pass
+
+def timeoutHandler(signum,frame):
+  print("timeout")
+  raise UtilsTimeout("timeout after %f seconds" % timeout)
+
+def registerSignalTimeoutHandler():
+  signal.signal(signal.SIGALRM, timeoutHandler)
+
+def setTimeout(time = timeout):
+  timeout = time
+  print("set timeout to:", time)
+  signal.alarm(time) # time in seconds
+
+def cancelTimeout():
+  signal.alarm(0)
+

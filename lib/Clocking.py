@@ -122,7 +122,7 @@ class Clocking:
 
         if self.odooReachable:
             try:
-                res = self.Odoo.check_attendance(self.card)
+                res = self.Odoo.checkAttendance(self.card)
                 if res:
                     _logger.debug("response odoo - check attendance ", res)
                     self.employeeName = res["employee_name"]

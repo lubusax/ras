@@ -96,7 +96,8 @@ class OdooXMLrpc:
     def isOdooPortOpen(self):
         return Utils.isIpPortOpen(self.odooIpPort)
 
-    def check_attendance(self, card):
+    def checkAttendance(self, card):
+        Utils.setTimeout(1)
         try:
             object_facade = self._get_object_facade("/xmlrpc/object")
             if object_facade:
@@ -109,9 +110,16 @@ class OdooXMLrpc:
                     card,
                 )
             return res
+        except UtilsTimeout as timeoutMessage:
+            print("in CheckAttendance ", timeoutMessage)
+            return False
         except Exception as e:
             _logger.exception(e)
             return False
+        finally:
+            Utils.cancelTimeout()
+
+
 
     def ensureNoDataJsonFile(self):
         if os.path.isfile(self.datajson):
