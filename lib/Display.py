@@ -19,6 +19,7 @@ class Display:
         self.font1 = ImageFont.truetype(self.font_ttf, 30)
         self.font2 = ImageFont.truetype(self.font_ttf, 14)
         self.font3 = ImageFont.truetype(self.font_ttf, 22)
+        self.display_msg("connecting")
 
     def _display_time(self, wifi_quality, odoo_m):
         with canvas(self.device) as draw:

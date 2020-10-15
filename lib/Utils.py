@@ -166,20 +166,25 @@ def getSettingsFromDeviceCustomization():
   settings["fileForMessages"]   = getOptionFromDeviceCustomization("fileForMessages"  , defaultValue= "messagesDicDefault.json")
   settings["messagesDic"]       = getJsonData(WORK_DIR + "dicts/" + settings["fileForMessages"])
   settings["SSIDreset"]         = getOptionFromDeviceCustomization("SSIDreset"  , defaultValue= "__RAS__")
-
-def getDefaultMessagesDic():
-  defaultMessagesDic = getJsonData(WORK_DIR + "dicts/messagesDicDefault.json")
-  return defaultMessagesDic
+  settings["defaultMessagesDic"]= getJsonData(WORK_DIR + "dicts/messagesDicDefault.json")
 
 def getMsg(textKey):
   try:
     return settings["messagesDic"][textKey] 
+  except KeyError:
+    return settings["defaultMessagesDic"][textKey]
   except:
     return None
 
 def getMsgTranslated(textKey):
-  msgTranslated = getMsg(textKey)[settings["language"]]       
-  return copy.deepcopy(msgTranslated)
+  try:
+    msgTranslated = getMsg(textKey)[settings["language"]]       
+    return copy.deepcopy(msgTranslated)
+  except:
+    if textKey == "listOfLanguages":
+      return ["ENGLISH"]
+    else:
+      return [[0, 0], 20," "]
 
 def getListOfLanguages(defaultListOfLanguages = ["ENGLISH"]):
   try:
@@ -188,4 +193,4 @@ def getListOfLanguages(defaultListOfLanguages = ["ENGLISH"]):
     return defaultListOfLanguages
 
 getSettingsFromDeviceCustomization()
-getDefaultMessagesDic()
+
