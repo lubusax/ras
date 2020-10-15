@@ -20,7 +20,7 @@
       "1"
     ],
     "odoo_host": [
-      "192.168.0.31"
+      "192.168.0.xx"
     ],
     "odoo_port": [
       "8069"
@@ -29,10 +29,10 @@
       "+01:00"
     ],
     "user_name": [
-      "luis"
+      "user"
     ],
     "user_password": [
-      "luis"
+      "psswd"
     ]
   },
   "showEmployeeName": "yes",

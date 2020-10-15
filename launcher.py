@@ -17,6 +17,8 @@ from io import StringIO
 _logger = logging.getLogger(__name__)
 
 #Utils.getSettingsFromDeviceCustomization() # initialize device customization settings/options
+Utils.migrationToVersion1_4_2()
+Utils.getSettingsFromDeviceCustomization()
 
 Buzz = PasBuz.PasBuz(PinsBuzzer)
 Disp = Display.Display()

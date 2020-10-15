@@ -6,10 +6,12 @@ import socket
 import copy
 import functools
 
-WORK_DIR                = "/home/pi/ras/"
-fileDeviceCustomization = WORK_DIR + "dicts/deviceCustomization.json"
-settings                = {}
-defaultMessagesDic      = {}
+WORK_DIR                      = "/home/pi/ras/"
+fileDeviceCustomization       = WORK_DIR + "dicts/deviceCustomization.json"
+fileDeviceCustomizationSample = WORK_DIR + "dicts/deviceCustomization.sample.json"
+fileDataJson                  = WORK_DIR + "dicts/data.json"
+settings                      = {}
+defaultMessagesDic            = {}
 
 def timer(func):
     @functools.wraps(func)
@@ -192,5 +194,32 @@ def getListOfLanguages(defaultListOfLanguages = ["ENGLISH"]):
   except:
     return defaultListOfLanguages
 
-getSettingsFromDeviceCustomization()
+def transferDataJsonToDeviceCustomization(deviceCustomizationDic):
+  dataJsonOdooParameters = getJsonData(fileDataJson)
+  if dataJsonOdooParameters:
+    #print("dataJson params:",  dataJsonOdooParameters)
+    #deviceCustomizationDic["odooParameters"] = {}
+    deviceCustomizationDic["odooParameters"] = dataJsonOdooParameters
+    deviceCustomizationDic["odooConnectedAtLeastOnce"] = True
+  else:
+    deviceCustomizationDic["odooConnectedAtLeastOnce"] = False
+  return deviceCustomizationDic
+
+
+def migrationToVersion1_4_2():
+  deviceCustomizationDic        = getJsonData(fileDeviceCustomization)
+  deviceCustomizationSampleDic  = getJsonData(fileDeviceCustomizationSample)
+  if deviceCustomizationDic:
+    #add 
+    deviceCustomizationDic["SSIDreset"]       = deviceCustomizationSampleDic["SSIDreset"]
+    deviceCustomizationDic["fileForMessages"] = deviceCustomizationSampleDic["fileForMessages"]
+    deviceCustomizationDic["firmwareVersion"] = deviceCustomizationSampleDic["firmwareVersion"]
+  else:
+    deviceCustomizationDic = copy.deepcopy(deviceCustomizationSampleDic)
+    deviceCustomizationDic = transferDataJsonToDeviceCustomization(deviceCustomizationDic)
+  print("deviceCustomizationDic: ", deviceCustomizationDic)
+  storeJsonData(fileDeviceCustomization,deviceCustomizationDic)
+
+
+#getSettingsFromDeviceCustomization()
 
