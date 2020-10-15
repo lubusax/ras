@@ -16,7 +16,7 @@ from io import StringIO
 
 _logger = logging.getLogger(__name__)
 
-Utils.getSettingsFromDeviceCustomization() # initialize device customization settings/options
+#Utils.getSettingsFromDeviceCustomization() # initialize device customization settings/options
 
 Buzz = PasBuz.PasBuz(PinsBuzzer)
 Disp = Display.Display()
@@ -25,7 +25,7 @@ B_Down = Button.Button(PinsDown)
 B_OK = Button.Button(PinsOK)
 Hardware = [Buzz, Disp, Reader, B_Down, B_OK]
 
-Odoo = OdooXMLrpc.OdooXMLrpc()  
+Odoo = OdooXMLrpc.OdooXMLrpc(Disp)  
 Tasks = Tasks.Tasks(Odoo, Hardware)
 
 def mainLoop():

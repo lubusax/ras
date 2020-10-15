@@ -8,7 +8,8 @@ import functools
 
 WORK_DIR                = "/home/pi/ras/"
 fileDeviceCustomization = WORK_DIR + "dicts/deviceCustomization.json"
-settings = {}
+settings                = {}
+defaultMessagesDic      = {}
 
 def timer(func):
     @functools.wraps(func)
@@ -160,12 +161,15 @@ def storeOptionInDeviceCustomization(option,value):
     return False
 
 def getSettingsFromDeviceCustomization():
-  print("in get Settings")
   settings["language"]          = getOptionFromDeviceCustomization("language"         , defaultValue= "ENGLISH")
   settings["showEmployeeName"]  = getOptionFromDeviceCustomization("showEmployeeName" , defaultValue= "yes")
-  settings["fileForMessages"]   = getOptionFromDeviceCustomization("fileForMessages"  , defaultValue= "messagesDic.json")
+  settings["fileForMessages"]   = getOptionFromDeviceCustomization("fileForMessages"  , defaultValue= "messagesDicDefault.json")
   settings["messagesDic"]       = getJsonData(WORK_DIR + "dicts/" + settings["fileForMessages"])
   settings["SSIDreset"]         = getOptionFromDeviceCustomization("SSIDreset"  , defaultValue= "__RAS__")
+
+def getDefaultMessagesDic():
+  defaultMessagesDic = getJsonData(WORK_DIR + "dicts/messagesDicDefault.json")
+  return defaultMessagesDic
 
 def getMsg(textKey):
   try:
@@ -177,9 +181,11 @@ def getMsgTranslated(textKey):
   msgTranslated = getMsg(textKey)[settings["language"]]       
   return copy.deepcopy(msgTranslated)
 
-
 def getListOfLanguages(defaultListOfLanguages = ["ENGLISH"]):
   try:
     return getMsg("listOfLanguages")
   except:
     return defaultListOfLanguages
+
+getSettingsFromDeviceCustomization()
+getDefaultMessagesDic()

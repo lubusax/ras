@@ -281,6 +281,13 @@
     "ENGLISH": [[0, 0], 14,"No WiFi signal"],
     "ESPAÑOL": [[0, 0], 14,"No hay señal WiFi"],
     "FRANÇAIS": [[0, 0], 14,"Aucun Signal WIFI"]
+  },
+
+  "noRouteToHost":
+  {
+    "ENGLISH": [[0, 6], 15, "No route\nto host\ndatabase\n\n-----------------"],
+    "ESPAÑOL": [[0, 6], 15,"Sin ruta a\nla base de\ndatos del host\n\n-----------------"],
+    "FRANÇAIS": [[0, 6], 15,"Pas de route\nvers la base de\ndonnées hôte\n\n-----------------"]
   }
 
 }

@@ -13,8 +13,9 @@ from . import Utils
 _logger = logging.getLogger(__name__)
 
 class OdooXMLrpc:
-    def __init__(self):
-        self.datajson                   = Utils.WORK_DIR + "dicts/data.json"
+    def __init__(self, Display):
+        self.display        = Display
+        self.datajson       = Utils.WORK_DIR + "dicts/data.json"
         self.set_params()
         _logger.debug("Odoo XMLrpc Class Initialized")
 
@@ -93,6 +94,12 @@ class OdooXMLrpc:
         except ConnectionRefusedError:
             _logger.debug(ConnectionRefusedError)
             return None
+        except OSError as osError:
+            _logger.debug(OSError)
+            if "No route to host" in str(osError):
+                self.display.display_msg("noRouteToHost")
+                time.sleep(1.5)
+            return None 
         except Exception as e:
             _logger.exception(e)
             return None
