@@ -17,15 +17,24 @@ class Clocking:
 		self.B_Down = hardware[3]  # Button Down
 		self.B_OK = hardware[4]  # Button OK
 
-		self.timeToDisplayResult = Utils.settings["timeToDisplayResultAfterClocking"] #1.4 seconds for example
+		self.syncClockingMethods = {
+			"notDefined"          : self.notDefined  ,
+			"syncClockable"       : self.syncClockable  ,
+			"instanceDown"        : self.instanceDown  ,
+			"noInternet"          : self.noInternet  ,
+			"userNotValidAnymore" : self.userNotValidAnymore  ,
+		}
 
-		self.msg = False    # determines Melody to play and/or Text to display depending on Event happened: for example check in,
-												# check out, communication with odoo not possible ...
-
-		self.employeeName       = None
+		self.asyncClockingMethods = {
+			"notDefined"          : self.asyncClocking  ,
+			"syncClockable"       : self.syncClockable  ,
+			"instanceDown"        : self.asyncClocking ,
+			"noInternet"          : self.asyncClocking  ,
+			"userNotValidAnymore" : self.asyncClocking  ,
+		}
 
 	#@Utils.timer
-	def doTheClocking(self):
+	def syncClockable(self):
 		try:
 			res = self.Odoo.registerAttendanceSync(self.Reader.card)
 			if res:
@@ -36,24 +45,35 @@ class Clocking:
 		except Exception as e:
 				print("exception in dotheclocking e:", e)
 
+	def notDefined(self):
+		self.msg = "comm_failed"
+
+	def instanceDown(self):
+		self.msg = "comm_failed"
+
+	def noInternet(self):
+		self.msg = "comm_failed"
+
+	def userNotValidAnymore(self):
+		self.msg = "comm_failed"
+
+	def asyncClocking(self):
+		self.msg = "comm_failed"		
+
 	#@Utils.timer
 	def card_logging(self):
 		self.Disp.lockForTheClock = True
 		self.Disp.display_msg("connecting")
+		self.msg = "comm_failed"
+		self.employeeName  = None
 
-		if self.Odoo.uid and self.odooReachable: # check if the uid was set after running SetParams
-				# print("do the Clocking ")
-				if self.isWifiStable():
-						self.doTheClocking()
-				else:
-						self.msg = "no_wifi"
-		else:
-				self.msg = "comm_failed"
+		print("clocking method ", Utils.parameters["odooReachability"])
+		self.syncClockingMethods[Utils.parameters["odooReachability"]]()
 		
 		self.Disp.display_msg(self.msg, self.employeeName)
 		self.Buzz.Play(self.msg)
 
-		time.sleep(self.timeToDisplayResult)
+		time.sleep(Utils.settings["timeToDisplayResultAfterClocking"])
 		self.Disp.lockForTheClock = False
-		self.Disp._display_time(Utils.parameters["wifiSignalQualityMessage"], Utils.parameters["odooReachabilityMessage"])
+		self.Disp.displayTime()
 

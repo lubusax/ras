@@ -24,7 +24,7 @@ class Display:
         self.display_msg("connecting")
         self.lockForTheClock = False                      
 
-    def _display_time(self, wifiSignalQualityMessage, odooReachabilityMessage):
+    def displayTime(self):
         if not self.lockForTheClock:
             with canvas(self.device) as draw:
                 hour = time.strftime("%H:%M", time.localtime())
@@ -40,8 +40,8 @@ class Display:
                 else:
                     draw.text((12, 9), hour, font=self.fontClockTime, fill="white")
                 draw.text((0, 0), "WiFi " +"\n"*7+"-"*19, font=self.fontClockInfos, fill="white", align="center")
-                draw.text((0, 0), wifiSignalQualityMessage +"\n"*7+"-"*23, font=self.font4, fill="white", align="center")
-                draw.text((0, 51), odooReachabilityMessage+"\n"*2+"-"*26, font=self.fontClockInfos, fill="white", align="center")   
+                draw.text((0, 0), Utils.parameters["wifiStable"] +"\n"*7+"-"*23, font=self.font4, fill="white", align="center")
+                draw.text((0, 51), Utils.parameters["odooReachabilityMessage"] +"\n"*2+"-"*26, font=self.fontClockInfos, fill="white", align="center")   
 
     def showCard(self,card):
         with canvas(self.device) as draw:

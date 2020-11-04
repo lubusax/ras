@@ -155,14 +155,14 @@ class Tasks:
 		
 		def threadEvaluateReachability(period):
 				while not exitFlag.isSet():
-						Utils.evaluateOdooreachability()   # Odoo and Wifi Status Messages are updated
+						Utils.evaluateOdooReachability()   # Odoo and Wifi Status Messages are updated
 						exitFlag.wait(period)
 
 		def threadDisplayClock(period):
 			while not exitFlag.isSet():
 				#print("messages", self.Clock.wifiSignalQualityMessage, self.Clock.odooReachabilityMessage)
 				if not self.Disp.lockForTheClock:	
-					self.Disp._display_time(self.Clock.wifiSignalQualityMessage, self.Clock.odooReachabilityMessage) 
+					self.Disp.displayTime() 
 				exitFlag.wait(period)
  
 		exitFlag = threading.Event()

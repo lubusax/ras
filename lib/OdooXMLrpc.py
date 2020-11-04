@@ -21,6 +21,7 @@ class OdooXMLrpc:
         self.adm                = False
         Utils.parameters["odooReachability"] = Utils.OdooState.notDefined
         Utils.parameters["odooIpPortOpen"]   = False
+        Utils.parameters["odooUid"] = False
         self.getUIDfromOdoo()
         _logger.debug("Odoo XMLrpc Class Initialized")
 
@@ -48,6 +49,7 @@ class OdooXMLrpc:
             if user_id:
                 print("got user id from Odoo ", user_id)
                 self.uid = user_id
+                Utils.parameters["odooUid"] = user_id
                 Utils.storeOptionInDeviceCustomization("odooConnectedAtLeastOnce", True)
                 returnValue =  True
             else:

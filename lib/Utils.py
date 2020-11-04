@@ -31,30 +31,46 @@ class OdooState(Enum): # Odoo Reachability State
     noInternet              =auto()
     userNotValidAnymore     =auto()
 
+# syncClockingMethods = {
+#   "notDefined"          : self.notDefined  ,
+#   "syncClockable"       : self.syncClockable  ,
+#   "instanceDown"        : self.instanceDown  ,
+#   "noInternet"          : self.noInternet  ,
+#   "userNotValidAnymore" : self.userNotValidAnymore  ,
+# }
+
+# asyncClockingMethods = {
+#   "notDefined"          : self.asyncClocking  ,
+#   "syncClockable"       : self.syncClockable  ,
+#   "instanceDown"        : self.asyncClocking ,
+#   "noInternet"          : self.asyncClocking  ,
+#   "userNotValidAnymore" : self.asyncClocking  ,
+# }
+
 def timer(func):
-    @functools.wraps(func)
-    def wrapper_timer(*args, **kwargs):
-        tic = time.perf_counter()
-        value = func(*args, **kwargs)
-        toc = time.perf_counter()
-        elapsed_time = toc - tic
-        print("Elapsed time: {1:0.4f} seconds - Function: {0}".format(func, elapsed_time))
-        return value
-    return wrapper_timer
+  @functools.wraps(func)
+  def wrapper_timer(*args, **kwargs):
+    tic = time.perf_counter()
+    value = func(*args, **kwargs)
+    toc = time.perf_counter()
+    elapsed_time = toc - tic
+    print("Elapsed time: {1:0.4f} seconds - Function: {0}".format(func, elapsed_time))
+    return value
+  return wrapper_timer
 
 class Timer:
   def __init__(self, howLong):
-    reset()
-    howLong = howLong
+    self.reset()
+    self.howLong = howLong
 
-  def reset():
-    startTime = time.perf_counter()
+  def reset(self):
+    self.startTime = time.perf_counter()
 
-  def elapsedTime():
-    return (time.perf_counter()- startTime)
+  def elapsedTime(self):
+    return (time.perf_counter()- self.startTime)
 
-  def isElapsed():
-    if elapsedTime() > howLong:
+  def isElapsed(self):
+    if self.elapsedTime() > self.howLong:
       return True
     return False
 
@@ -212,7 +228,7 @@ def getSettingsFromDeviceCustomization():
   settings["periodEvaluateReachability"]        = getOptionFromDeviceCustomization("periodEvaluateReachability" , defaultValue = 5.0)
   settings["periodDisplayClock"]                = getOptionFromDeviceCustomization("periodDisplayClock" , defaultValue = 10.0)
   settings["timeToDisplayResultAfterClocking"]  = getOptionFromDeviceCustomization("timeToDisplayResultAfterClocking", defaultValue = 1.2)
-
+  settings["asyncClockingEnabled"]                = getOptionFromDeviceCustomization("asyncClockingEnabled", defaultValue = False)
 
 def getMsg(textKey):
   try:
@@ -259,11 +275,14 @@ def handleMigratioOfDeviceCustomizationFile():
   if there is no "DeviceCustomization" File,
   take the sample file
   if there is a "DeviceCustomization" File,
-  add the Fieldsin newOptionsList
+  add the Fields in newOptionsList
   '''
   deviceCustomizationDic        = getJsonData(fileDeviceCustomization)
   deviceCustomizationSampleDic  = getJsonData(fileDeviceCustomizationSample)
-  newOptionsList = ["SSIDreset","fileForMessages","firmwareVersion","ssh", "sshPassword", "timeoutToGetOdooUID", "timeoutToCheckAttendance", "periodEvaluateReachability", "periodDisplayClock", "timeToDisplayResultAfterClocking" ]
+  newOptionsList = ["SSIDreset","fileForMessages","firmwareVersion","ssh",
+        "sshPassword", "timeoutToGetOdooUID", "timeoutToCheckAttendance",
+        "periodEvaluateReachability", "periodDisplayClock", "timeToDisplayResultAfterClocking",
+        "asyncClockingEnabled" ]
   if deviceCustomizationDic:
     for option in newOptionsList:
       if not(option in deviceCustomizationDic) and (option in deviceCustomizationSampleDic):
@@ -320,13 +339,13 @@ def disableSSH():
   except Exception as e:
     print("Exception in method Utils.disableSSH: ", e)
 
-def isWifiActive():
+def isWlan0Active():
   iwconfig_out = subprocess.check_output("iwconfig wlan0", shell=True).decode("utf-8")
   if "Access Point: Not-Associated" in iwconfig_out:
-    wifiActive = False
+    wlan0Active = False
   else:
-    wifiActive = True
-  return wifiActive
+    wlan0Active = True
+  return wlan0Active
 
   #@Utils.timer
 
@@ -358,8 +377,8 @@ def getDictWithWlan0Status():
   return resultdict
 
 #@Utils.timer
-def isWifiStable():
-  if isWifiActive():
+def evaluateWlan0Stability():
+  if isWlan0Active():
     strength = int(getDictWithWlan0Status()["Signal level"])  # in dBm
     if strength >= 79:
       parameters["wifiSignalQualityMessage"]  = "\u2022" * 1 + "o" * 4
@@ -379,19 +398,18 @@ def isWifiStable():
   else:
     parameters["wifiSignalQualityMessage"]  = getMsgTranslated("noWiFiSignal")[2]
     parameters["wifiStable"] = False
-    
-  return parameters["wifiStable"]
 
 #@Utils.timer
-def isOdooReachable():
-  parameters["wifiStable"]    = isWifiStable()
+def evaluateOdooReachability():
+  evaluateWlan0Stability()
+
   parameters["odooIpPortOpen"]  = isIpPortOpen(parameters["odooIpPort"])
 
-  if not wifi:
+  if not parameters["wifiStable"]:
     parameters["odooReachability"] = State.noInternet
-  elif not Odoo.ipPortOpen:
+  elif not parameters["odooIpPortOpen"]:
     parameters["odooReachability"] = State.instanceDown
-  elif not Odoo.uid:
+  elif not parameters["odooUid"]:
     parameters["odooReachability"] = State.userNotValidAnymore
   else:
     parameters["odooReachability"] = State.syncClockable            
