@@ -7,16 +7,29 @@ import copy
 import functools
 import subprocess
 
+from enum import Enum, unique, auto
+
+from dicts import tz_dic
+
 WORK_DIR                      = "/home/pi/ras/"
 fileDeviceCustomization       = WORK_DIR + "dicts/deviceCustomization.json"
 fileDeviceCustomizationSample = WORK_DIR + "dicts/deviceCustomization.sample.json"
 fileDataJson                  = WORK_DIR + "dicts/data.json"
 fileCredentials               = WORK_DIR + "dicts/credentials.json"
 
-settings                      = {}
+settings                      = {} # settings are more permanent than parameters, they are user defined and stored in a file 
+parameters                    = {} # parameters change more frequently and show the different states in the device
 defaultMessagesDic            = {}
 credentialsDic                = {}
 defaultCredentialsDic         = {"username": ["admin"], "new password": ["admin"], "old password": ["password"]}
+
+@unique
+class OdooState(Enum): # Odoo Reachability State
+    notDefined              =auto()
+    syncClockable           =auto()
+    instanceDown            =auto()
+    noInternet              =auto()
+    userNotValidAnymore     =auto()
 
 def timer(func):
     @functools.wraps(func)
@@ -31,17 +44,17 @@ def timer(func):
 
 class Timer:
   def __init__(self, howLong):
-    self.reset()
-    self.howLong = howLong
+    reset()
+    howLong = howLong
 
-  def reset(self):
-    self.startTime = time.perf_counter()
+  def reset():
+    startTime = time.perf_counter()
 
-  def elapsedTime(self):
-    return (time.perf_counter()- self.startTime)
+  def elapsedTime():
+    return (time.perf_counter()- startTime)
 
-  def isElapsed(self):
-    if self.elapsedTime() > self.howLong:
+  def isElapsed():
+    if elapsedTime() > howLong:
       return True
     return False
 
@@ -130,6 +143,7 @@ def storeOptionInJsonFile(filePath,option,optionValue):
   else:
       return False
 
+@timer
 def isPingable(address):
   response = os.system("ping -c 1 " + address)
   if response == 0:
@@ -145,16 +159,16 @@ def isIpPortOpen(ipPort): # you can not ping ports, you have to use connect_ex f
     canConnectResult = s.connect_ex(ipPort)
     if canConnectResult == 0:
       #print("Utils - IP Port OPEN ", ipPort)
-      isOpen = True
+      ipPortOpen = True
     else:
       #print("Utils - IP Port CLOSED ", ipPort)
-      isOpen = False
+      ipPortOpen = False
   except Exception as e:
     print("Utils - exception in method isIpPortOpen: ", e)
-    isOpen = False
+    ipPortOpen = False
   finally:
     s.close()
-  return isOpen
+  return ipPortOpen
 
 def getOptionFromKey(dataDic, key):
   try:
@@ -198,6 +212,8 @@ def getSettingsFromDeviceCustomization():
   settings["periodEvaluateReachability"]        = getOptionFromDeviceCustomization("periodEvaluateReachability" , defaultValue = 5.0)
   settings["periodDisplayClock"]                = getOptionFromDeviceCustomization("periodDisplayClock" , defaultValue = 10.0)
   settings["timeToDisplayResultAfterClocking"]  = getOptionFromDeviceCustomization("timeToDisplayResultAfterClocking", defaultValue = 1.2)
+
+
 def getMsg(textKey):
   try:
     return settings["messagesDic"][textKey] 
@@ -271,7 +287,10 @@ def migrationToVersion1_4_2():
     data = getJsonData(fileDataJson)
     print("read dict from data.json in method Utils.migrationToVersion1_4_2 ", data)
     if data and storeOptionInDeviceCustomization("odooParameters",data): # in data.json the Odoo Params are stored when a successful connection was made
-      storeOptionInDeviceCustomization("odooConnectedAtLeastOnce", True)    
+      if os.path.isfile(Utils.fileDataJson):
+        os.system("sudo rm " + Utils.fileDataJson)
+      storeOptionInDeviceCustomization("odooConnectedAtLeastOnce", True)
+
   except Exception as e:
     print("Exception in method Utils.migrationToVersion1_4_2 while trying to transfer data.json to deviceCustomization file: ", e)
 
@@ -280,9 +299,6 @@ def isOdooUsingHTTPS():
     if settings["odooParameters"]["https"]== ["https"]:
       return True
   return False
-
-
-  return credentialsDic
 
 def getOwnIpAddress():
   command = "hostname -I | awk '{ print $1}' "
@@ -303,4 +319,140 @@ def disableSSH():
     os.system("sudo service ssh stop")
   except Exception as e:
     print("Exception in method Utils.disableSSH: ", e)
+
+def isWifiActive():
+  iwconfig_out = subprocess.check_output("iwconfig wlan0", shell=True).decode("utf-8")
+  if "Access Point: Not-Associated" in iwconfig_out:
+    wifiActive = False
+  else:
+    wifiActive = True
+  return wifiActive
+
+  #@Utils.timer
+
+def getDictWithWlan0Status():
+  iwresult = subprocess.check_output("iwconfig wlan0", shell=True).decode("utf-8")
+  resultdict = {}
+  for iwresult in iwresult.split("  "):
+    if iwresult:
+      if iwresult.find(":") > 0:
+        datumname = iwresult.strip().split(":")[0]
+        datum = (
+            iwresult.strip()
+            .split(":")[1]
+            .split(" ")[0]
+            .split("/")[0]
+            .replace('"', "")
+        )
+        resultdict[datumname] = datum
+      elif iwresult.find("=") > 0:
+        datumname = iwresult.strip().split("=")[0]
+        datum = (
+            iwresult.strip()
+            .split("=")[1]
+            .split(" ")[0]
+            .split("/")[0]
+            .replace('"', "")
+        )
+        resultdict[datumname] = datum
+  return resultdict
+
+#@Utils.timer
+def isWifiStable():
+  if isWifiActive():
+    strength = int(getDictWithWlan0Status()["Signal level"])  # in dBm
+    if strength >= 79:
+      parameters["wifiSignalQualityMessage"]  = "\u2022" * 1 + "o" * 4
+      parameters["wifiStable"] = False
+    elif strength >= 75:
+      parameters["wifiSignalQualityMessage"]  = "\u2022" * 2 + "o" * 3
+      parameters["wifiStable"] = True
+    elif strength >= 65:
+      parameters["wifiSignalQualityMessage"]  = "\u2022" * 3 + "o" * 2
+      parameters["wifiStable"] = True
+    elif strength >= 40:
+      parameters["wifiSignalQualityMessage"]  = "\u2022" * 4 + "o" * 1
+      parameters["wifiStable"] = True
+    else:
+      parameters["wifiSignalQualityMessage"]  = "\u2022" * 5
+      parameters["wifiStable"] = True
+  else:
+    parameters["wifiSignalQualityMessage"]  = getMsgTranslated("noWiFiSignal")[2]
+    parameters["wifiStable"] = False
+    
+  return parameters["wifiStable"]
+
+#@Utils.timer
+def isOdooReachable():
+  parameters["wifiStable"]    = isWifiStable()
+  parameters["odooIpPortOpen"]  = isIpPortOpen(parameters["odooIpPort"])
+
+  if not wifi:
+    parameters["odooReachability"] = State.noInternet
+  elif not Odoo.ipPortOpen:
+    parameters["odooReachability"] = State.instanceDown
+  elif not Odoo.uid:
+    parameters["odooReachability"] = State.userNotValidAnymore
+  else:
+    parameters["odooReachability"] = State.syncClockable            
+
+  print("odooIpPortOpen ", parameters["odooIpPortOpen"])
+  print("wifiStable ", parameters["wifiStable"])
+
+  parameters["odooReachabilityMessage"] = getMsgTranslated(parameters["odooReachability"].name)[2]
+
+  print("odooReachabilityMessage", odooReachabilityMessage)
+
+def setOdooIpPort():
+  settings["odooIpPort"] = None
+  try:
+    print( "settings[""odooParameters""][""odoo_port""][0] ",settings["odooParameters"]["odoo_port"][0])
+    if settings["odooParameters"]["odoo_port"]!=[""]: 
+        portNumber =  int(settings["odooParameters"]["odoo_port"][0])                          
+    elif isOdooUsingHTTPS():
+        portNumber =   443
+    settings["odooIpPort"] = (settings["odooParameters"]["odoo_host"][0], portNumber)
+    return True
+  except Exception as e:
+    print("exception in method setOdooIpPort: ", e)
+    return False
+
+def setTimeZone():
+  try:
+    os.environ["TZ"] = tz_dic.tz_dic[settings["odooParameters"]["timezone"][0]]
+    time.tzset()
+    return True
+  except Exception as e:
+    print("exception in method setTimeZone: ", e)
+    return False
+
+def setOdooUrlTemplate():
+  try:
+    if isOdooUsingHTTPS():
+      settings["odooUrlTemplate"] = "https://%s" % settings["odooParameters"]["odoo_host"][0]
+    else:
+      settings["odooUrlTemplate"] = "http://%s" % settings["odooParameters"]["odoo_host"][0]
+
+    if settings["odooParameters"]["odoo_port"][0]:
+      settings["odooUrlTemplate"] += ":%s" % settings["odooParameters"]["odoo_port"][0]
+    # print("settings["odooUrlTemplate"] ",settings["odooUrlTemplate"] )
+    return True
+  except Exception as e:
+    settings["odooUrlTemplate"]    = None
+    # print("exception in method setOdooUrlTemplate: ", e)
+    return False
+
+def getServerProxy(url):
+  try:
+    serverProxy = xmlrpclib.ServerProxy(settings["odooUrlTemplate"] + str(url))
+    #print("serverProxy ", serverProxy)
+    return serverProxy
+  except Exception as e:
+    _logger.exception(e)
+    return False 
+
+def resetOdooParams():
+  storeOptionInDeviceCustomization("odooConnectedAtLeastOnce", False)
+  storeOptionInDeviceCustomization("odooParameters", None)
+  
 

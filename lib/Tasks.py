@@ -21,8 +21,6 @@ class Tasks:
 
 		self.Clock = Clocking.Clocking(Odoo, Hardware)
 		self.ask_twice = ask_twice  # list of tasks to ask 'are you sure?' upon selection
-		
-		self.wifiStable = self.Clock.wifiStable
 
 		self.periodPollCardReader 							= 0.2  # second
 		self.periodCheckBothButtonsPressed     	= 1     # seconds
@@ -154,30 +152,24 @@ class Tasks:
 		_logger.debug('Thread CheckBothButtonsPressed stopped')        
 
 	def clocking(self):
-		_logger.debug('Entering Clocking Option')
-
+		
 		def threadEvaluateReachability(period):
-				_logger.debug('Thread Get Messages started')
 				while not exitFlag.isSet():
-						self.Clock.isOdooReachable()   # Odoo and Wifi Status Messages are updated
+						Utils.evaluateOdooreachability()   # Odoo and Wifi Status Messages are updated
 						exitFlag.wait(period)
-				_logger.debug('Thread Get Messages stopped')
 
 		def threadDisplayClock(period):
-			self.Clock.isOdooReachable() 
-			_logger.debug('Thread Display Clock started')
 			while not exitFlag.isSet():
 				#print("messages", self.Clock.wifiSignalQualityMessage, self.Clock.odooReachabilityMessage)
 				if not self.Disp.lockForTheClock:	
 					self.Disp._display_time(self.Clock.wifiSignalQualityMessage, self.Clock.odooReachabilityMessage) 
 				exitFlag.wait(period)
-			_logger.debug('Thread Display Clock stopped')
  
 		exitFlag = threading.Event()
 		exitFlag.clear()
 
 		periodEvaluateReachability = Utils.settings["periodEvaluateReachability"]   # seconds		
-		periodDisplayClock         =  Utils.settings["periodDisplayClock"]  # seconds
+		periodDisplayClock         = Utils.settings["periodDisplayClock"]  # seconds
 
 		evaluateReachability    = threading.Thread(target=threadEvaluateReachability, args=(periodEvaluateReachability,))
 		pollCardReader          = threading.Thread(target=self.threadPollCardReader, args=(self.periodPollCardReader,exitFlag,self.Clock.card_logging,))
@@ -194,8 +186,6 @@ class Tasks:
 		pollCardReader.join()
 		displayClock.join()
 		checkBothButtonsPressed.join()
-
-		_logger.debug('Exiting Clocking Option')
 
 	def chooseLanguage(self):
 		def goOneLanguageDownInTheMenu():
@@ -268,7 +258,7 @@ class Tasks:
 			time.sleep(2)
 			self.Disp.lockForTheClock = False			
 
-		if self.wifiStable():
+		if self.Clock.isWifiStable():
 			if Utils.isPingable("github.com"):
 				doFirmwareUpdate()
 				self.nextTask = "reboot"
@@ -287,17 +277,13 @@ class Tasks:
 		self.Buzz.Play("back_to_menu")
 		self.nextTask = self.defaultNextTask
 
-	def isWifiWorking(self):
-		_logger.debug("checking if wifi works, i.e. if 1.1.1.1 pingable")
-		return Utils.isPingable("1.1.1.1")
-
 	def getOdooUIDwithNewParameters(self):
 		_logger.debug("getOdooUIDwithNewParameters")
 		#self.ensureThatWifiWorks()
-		if self.wifiStable():
+		if self.Clock.isWifiStable():
 			self.Disp.displayWithIP('browseForNewOdooParams')
 
-			self.Odoo.ensureNoDataJsonFile()
+			Utils.resetOdooParams()
 			self.Odoo.uid = False
 
 			exitFlag = threading.Event()
@@ -419,7 +405,7 @@ class Tasks:
 				goOneOptionDownInTheMenu()
 
 	def ensureThatWifiWorks(self):
-		if not self.isWifiWorking(): 
+		if not Utils.isPingable("1.1.1.1"): 
 			self.resetWifi()
 
 	def ensureThatOdooHasBeenReachedAtLeastOnce(self):
