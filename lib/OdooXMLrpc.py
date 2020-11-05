@@ -32,7 +32,7 @@ class OdooXMLrpc:
         Utils.setOdooUrlTemplate()
         Utils.setOdooIpPort()
         self.setUserID()
-        print("got user id from Odoo ", self.uid)                                                                  
+        print("getUIDfromOdoo - got user id from Odoo ", self.uid)                                                                  
          
     #@Utils.timer
     def setUserID(self):
@@ -40,14 +40,17 @@ class OdooXMLrpc:
         returnValue = False
         try:
             loginServerProxy = Utils.getServerProxy("/xmlrpc/common")
+            
             setTimeout(float(Utils.settings["timeoutToGetOdooUID"]) or None)
-            #print("timeoutToGetOdooUID: ", float(Utils.settings["timeoutToGetOdooUID"]) or None )
+            print("timeoutToGetOdooUID: ", float(Utils.settings["timeoutToGetOdooUID"]) or None )
             user_id = loginServerProxy.login(
                 Utils.settings["odooParameters"]["db"][0],
                 Utils.settings["odooParameters"]["user_name"][0],
                 Utils.settings["odooParameters"]["user_password"][0])
             if user_id:
-                print("got user id from Odoo ", user_id)
+                print("_"*80)
+                print("setUserID - got user id from Odoo ", user_id)
+                print("_"*80)
                 self.uid = user_id
                 Utils.parameters["odooUid"] = user_id
                 Utils.storeOptionInDeviceCustomization("odooConnectedAtLeastOnce", True)

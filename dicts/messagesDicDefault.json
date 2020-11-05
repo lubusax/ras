@@ -233,6 +233,84 @@
       "appuyez sur OK\npour changer\n la LANGUE\n\n---------------------"
     ]
   },
+  "notDefined": {
+    "ENGLISH": [
+      [
+        0,
+        0
+      ],
+      14,
+      "please wait\n-----------------\n"
+    ],
+    "ESPA\u00d1OL": [
+      [
+        0,
+        0
+      ],
+      14,
+      "espere, por favor\n-----------------\n"
+    ],
+    "FRAN\u00c7AIS": [
+      [
+        0,
+        0
+      ],
+      14,
+      "veuillez patienter\n-------------------------\n"
+    ]
+  },
+  "syncClockable": {
+    "ENGLISH": [
+      [
+        0,
+        0
+      ],
+      14,
+      "Odoo connected\n-------------------------\n"
+    ],
+    "ESPA\u00d1OL": [
+      [
+        0,
+        0
+      ],
+      14,
+      "Odoo conectado\n-------------------------\n"
+    ],
+    "FRAN\u00c7AIS": [
+      [
+        0,
+        0
+      ],
+      14,
+      "Odoo connect\u00e9\n------------------------\n"
+    ]
+  },
+  "instanceDown": {
+    "ENGLISH": [
+      [
+        0,
+        0
+      ],
+      14,
+      "Odoo is down\n-------------------------\n"
+    ],
+    "ESPA\u00d1OL": [
+      [
+        0,
+        0
+      ],
+      14,
+      "Odoo conectado\n-------------------------\n"
+    ],
+    "FRAN\u00c7AIS": [
+      [
+        0,
+        0
+      ],
+      14,
+      "Odoo connect\u00e9\n------------------------\n"
+    ]
+  },
   "clockScreen_databaseNotConnected": {
     "ENGLISH": [
       [

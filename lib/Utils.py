@@ -7,6 +7,8 @@ import copy
 import functools
 import subprocess
 
+import xmlrpc.client as xmlrpclib
+
 from enum import Enum, unique, auto
 
 from dicts import tz_dic
@@ -319,6 +321,9 @@ def initializeParameters():
   parameters["wifiStable"] = False
   parameters["odooReachability"] = OdooState.notDefined
   parameters["odooReachabilityMessage"] = getMsgTranslated(parameters["odooReachability"].name)[2]
+  print("i was in Utils.initializeParameters() - wifiSignalQualityMessage: ", parameters["wifiSignalQualityMessage"])
+  print("i was in Utils.initializeParameters() - odooReachabilityMessage: ", parameters["odooReachabilityMessage"])
+ 
 
 def isOdooUsingHTTPS():
   if  "https" in settings["odooParameters"].keys():
@@ -406,6 +411,10 @@ def evaluateWlan0Stability():
     parameters["wifiSignalQualityMessage"]  = getMsgTranslated("noWiFiSignal")[2]
     parameters["wifiStable"] = False
 
+  print("i was in Utils.evaluateWlan0Stability() - wifiSignalQualityMessage: ", parameters["wifiSignalQualityMessage"])
+  print("i was in Utils.evaluateWlan0Stability() - odooReachabilityMessage: ", parameters["odooReachabilityMessage"])
+
+
 #@Utils.timer
 def evaluateOdooReachability():
   try:
@@ -445,6 +454,7 @@ def setOdooIpPort():
     elif isOdooUsingHTTPS():
         portNumber =   443
     settings["odooIpPort"] = (settings["odooParameters"]["odoo_host"][0], portNumber)
+    print("i was in setOdooIpPort() ", settings["odooIpPort"])
     return True
   except Exception as e:
     print("exception in method setOdooIpPort: ", e)
@@ -454,6 +464,7 @@ def setTimeZone():
   try:
     os.environ["TZ"] = tz_dic.tz_dic[settings["odooParameters"]["timezone"][0]]
     time.tzset()
+    print("i was in setTimeZone() tz:", tz_dic.tz_dic[settings["odooParameters"]["timezone"][0]])
     return True
   except Exception as e:
     print("exception in method setTimeZone: ", e)
@@ -468,7 +479,7 @@ def setOdooUrlTemplate():
 
     if settings["odooParameters"]["odoo_port"][0]:
       settings["odooUrlTemplate"] += ":%s" % settings["odooParameters"]["odoo_port"][0]
-    # print("settings["odooUrlTemplate"] ",settings["odooUrlTemplate"] )
+    print("i was in setOdooUrlTemplate() - settings[odooUrlTemplate] ",settings["odooUrlTemplate"] )
     return True
   except Exception as e:
     settings["odooUrlTemplate"]    = None
@@ -478,9 +489,10 @@ def setOdooUrlTemplate():
 def getServerProxy(url):
   try:
     serverProxy = xmlrpclib.ServerProxy(settings["odooUrlTemplate"] + str(url))
-    #print("serverProxy ", serverProxy)
+    print("i was in serverProxy etServerProxy(url): ", serverProxy)
     return serverProxy
   except Exception as e:
+    print("exception in serverProxy :", e)
     _logger.exception(e)
     return False 
 
