@@ -45,11 +45,11 @@ class OdooXMLrpc:
                 self.odooUrlTemplate = "http://%s" % Utils.settings["odooParameters"]["odoo_host"][0]                
             if Utils.settings["odooParameters"]["odoo_port"][0]:
                 self.odooUrlTemplate += ":%s" % Utils.settings["odooParameters"]["odoo_port"][0]
-            # print("self.odooUrlTemplate ",self.odooUrlTemplate )
+            print("self.odooUrlTemplate ",self.odooUrlTemplate )
             return True
         except Exception as e:
             self.odooUrlTemplate    = None
-            # print("exception in method setOdooUrlTemplate: ", e)
+            print("exception in method setOdooUrlTemplate: ", e)
             return False        
                
     def setOdooIpPort(self):
@@ -61,6 +61,7 @@ class OdooXMLrpc:
             elif Utils.isOdooUsingHTTPS():
                 portNumber =   443
             self.odooIpPort = (Utils.settings["odooParameters"]["odoo_host"][0], portNumber)
+            print("self.odooIpPort ", self.odooIpPort )
             return True
         except Exception as e:
             print("exception in method setOdooIpPort: ", e)
@@ -82,7 +83,7 @@ class OdooXMLrpc:
         try:
             loginServerProxy = self.getServerProxy("/xmlrpc/common")
             setTimeout(float(Utils.settings["timeoutToGetOdooUID"]) or None)
-            #print("timeoutToGetOdooUID: ", float(Utils.settings["timeoutToGetOdooUID"]) or None )
+            print("timeoutToGetOdooUID: ", float(Utils.settings["timeoutToGetOdooUID"]) or None )
             user_id = loginServerProxy.login(
                 Utils.settings["odooParameters"]["db"][0],
                 Utils.settings["odooParameters"]["user_name"][0],
@@ -96,14 +97,14 @@ class OdooXMLrpc:
                 print("NO user id from Odoo ", user_id)
                 returnValue =  False
         except ConnectionRefusedError as e:
-            print("ConnectionRefusedError checkattendance odoo ln139", e)
+            print("ConnectionRefusedError setUserID odoo ln139", e)
             _logger.debug(ConnectionRefusedError)
             returnValue =  False
         except socket.timeout as e:
-            print("timeout checkattendance odoo ln139", e)
+            print("timeout setUserID odoo ln139", e)
             returnValue = False
         except OSError as osError:
-            print("osError checkattendance odoo ln139", osError)
+            print("osError setUserID odoo ln139", osError)
             _logger.debug(OSError)
             if "No route to host" in str(osError):
                 self.display.display_msg("noRouteToHost")
