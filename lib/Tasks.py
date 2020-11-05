@@ -279,56 +279,63 @@ class Tasks:
 		self.nextTask = self.defaultNextTask
 
 	def getOdooUIDwithNewParameters(self):
-		_logger.debug("getOdooUIDwithNewParameters")
-		#self.ensureThatWifiWorks()
-		if self.Clock.isWifiStable():
-			self.Disp.displayWithIP('browseForNewOdooParams')
+		try:
+			print("i was in getOdooUIDwithNewParameters and parameters[wifiStable] is :", Utils.parameters["wifiStable"])
+			Utils.evaluateWlan0Stability()
+			if Utils.parameters["wifiStable"]:
+				self.Disp.displayWithIP('browseForNewOdooParams')
 
-			Utils.resetOdooParams()
-			self.Odoo.uid = False
+				print("i was in 2 ------")
 
-			exitFlag = threading.Event()
-			exitFlag.clear()
+				Utils.resetOdooParams()
+				Utils.parameters["odooUid"] = False
 
-			srv = routes.startServerOdooParams(exitFlag)
+				exitFlag = threading.Event()
+				exitFlag.clear()
 
-			pollCardReader 					= threading.Thread(target=self.threadPollCardReader, args=(
-																self.periodPollCardReader,exitFlag,self.displayCard_and_Buzz,))
-			checkBothButtonsPressed = threading.Thread(target=self.threadCheckBothButtonsPressed, args=(
-																self.periodCheckBothButtonsPressed, self.howLongShouldBeBothButtonsPressed, exitFlag))
-			serverKiller = threading.Thread(target=self.threadServerKiller, args=(
-																self.periodPollCardReader,exitFlag,srv))
+				srv = routes.startServerOdooParams(exitFlag)
 
-			pollCardReader.start()
-			checkBothButtonsPressed.start()
-			serverKiller.start()
+				pollCardReader 					= threading.Thread(target=self.threadPollCardReader, args=(
+																	self.periodPollCardReader,exitFlag,self.displayCard_and_Buzz,))
+				checkBothButtonsPressed = threading.Thread(target=self.threadCheckBothButtonsPressed, args=(
+																	self.periodCheckBothButtonsPressed, self.howLongShouldBeBothButtonsPressed, exitFlag))
+				serverKiller = threading.Thread(target=self.threadServerKiller, args=(
+																	self.periodPollCardReader,exitFlag,srv))
 
-			checkBothButtonsPressed.join()
-			pollCardReader.join()
-			serverKiller.join()
+				pollCardReader.start()
+				checkBothButtonsPressed.start()
+				serverKiller.start()
 
-			self.Odoo.getUIDfromOdoo()
+				print("i was in loop ------")
 
-			self.Disp.lockForTheClock = True
-			if self.Odoo.uid:
-				self.Buzz.Play("OK")				
-				self.Disp.display_msg("gotUID")
-				self.nextTask = self.defaultNextTask
+				checkBothButtonsPressed.join()
+				pollCardReader.join()
+				serverKiller.join()
+
+				self.Odoo.getUIDfromOdoo()
+
+				self.Disp.lockForTheClock = True
+				if Utils.parameters["odooUid"]:
+					self.Buzz.Play("OK")				
+					self.Disp.display_msg("gotUID")
+					self.nextTask = self.defaultNextTask
+				else:
+					self.Disp.display_msg("noUID")
+					self.Buzz.Play("FALSE")
+					self.nextTask = "resetOdoo"
+
 			else:
-				self.Disp.display_msg("noUID")
+				self.Disp.lockForTheClock = True
+				self.Disp.display_msg("no_wifi")
 				self.Buzz.Play("FALSE")
-				self.nextTask = "resetOdoo"
+				self.nextTask = "ensureWiFiAndOdoo"
 
-		else:
-			self.Disp.lockForTheClock = True
-			self.Disp.display_msg("no_wifi")
-			self.Buzz.Play("FALSE")
-			self.nextTask = "ensureWiFiAndOdoo"
-
-		time.sleep(3)
-		self.Disp.clear_display()
-		self.Buzz.Play("back_to_menu")
-		self.Disp.lockForTheClock = False
+			time.sleep(3)
+			self.Disp.clear_display()
+			self.Buzz.Play("back_to_menu")
+			self.Disp.lockForTheClock = False
+		except Exception as e:
+			print("exception in getOdooUIDwithNewParameters(self) : ",e)
 
 	def showVersion(self):
 			self.Disp.lockForTheClock = True
@@ -411,8 +418,8 @@ class Tasks:
 
 	def ensureThatOdooHasBeenReachedAtLeastOnce(self):
 		if not Utils.settings["odooConnectedAtLeastOnce"]:
-			#print("Odoo UID in ensureThatOdooHasBeenReachedAtLeastOnce", self.Odoo.uid)
-			while not self.Odoo.uid:
+			#print("Odoo UID in ensureThatOdooHasBeenReachedAtLeastOnce", Utils.parameters["odooUid"])
+			while not Utils.parameters["odooUid"]:
 				self.getOdooUIDwithNewParameters()
 		
 		self.nextTask = self.defaultNextTask

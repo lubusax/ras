@@ -16,6 +16,7 @@ class Display:
 		self.fontOrkney = Utils.WORK_DIR + "fonts/Orkney.ttf"
 		self.img_path = Utils.WORK_DIR + "images/"
 		self.device = get_device(("-d", display_driver))
+		print("in Display class init: self.device is ", self.device)
 		_logger.debug("Display Class Initialized")
 		self.fontClockTime = ImageFont.truetype(self.fontRoboto, 42)
 		self.fontClockInfos = ImageFont.truetype(self.fontRoboto, 14)
@@ -98,6 +99,7 @@ class Display:
 		self.displayMsgRaw(message)
     
 	def displayWithIP(self, textKey):
+		print("i was in displaywithIP ")
 		message = Utils.getMsgTranslated(textKey)
 		message[2] = message[2].replace("-IpPlaceholder-",Utils.getOwnIpAddress(),1)
 		self.displayMsgRaw(message)

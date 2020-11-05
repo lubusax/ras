@@ -300,7 +300,7 @@
         0
       ],
       14,
-      "Odoo conectado\n-------------------------\n"
+      "Odoo inactivo\n-------------------------\n"
     ],
     "FRAN\u00c7AIS": [
       [
@@ -308,7 +308,59 @@
         0
       ],
       14,
-      "Odoo connect\u00e9\n------------------------\n"
+      "Odoo en panne\n------------------------\n"
+    ]
+  },
+  "noInternet": {
+    "ENGLISH": [
+      [
+        0,
+        0
+      ],
+      14,
+      "no internet\n-------------------------\n"
+    ],
+    "ESPA\u00d1OL": [
+      [
+        0,
+        0
+      ],
+      14,
+      "sin internet\n-------------------------\n"
+    ],
+    "FRAN\u00c7AIS": [
+      [
+        0,
+        0
+      ],
+      14,
+      "pas d´Internet\n------------------------\n"
+    ]
+  },
+  "userNotValidAnymore": {
+    "ENGLISH": [
+      [
+        0,
+        0
+      ],
+      14,
+      "define user again\n-------------------------\n"
+    ],
+    "ESPA\u00d1OL": [
+      [
+        0,
+        0
+      ],
+      14,
+      "definir usuario de nuevo\n-------------------------\n"
+    ],
+    "FRAN\u00c7AIS": [
+      [
+        0,
+        0
+      ],
+      14,
+      "définir ´user´ à nouveau\n------------------------\n"
     ]
   },
   "clockScreen_databaseNotConnected": {

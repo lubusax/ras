@@ -321,6 +321,7 @@ def initializeParameters():
   parameters["wifiStable"] = False
   parameters["odooReachability"] = OdooState.notDefined
   parameters["odooReachabilityMessage"] = getMsgTranslated(parameters["odooReachability"].name)[2]
+  parameters["odooUid"] = None
   print("i was in Utils.initializeParameters() - wifiSignalQualityMessage: ", parameters["wifiSignalQualityMessage"])
   print("i was in Utils.initializeParameters() - odooReachabilityMessage: ", parameters["odooReachabilityMessage"])
  
