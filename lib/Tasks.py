@@ -155,6 +155,7 @@ class Tasks:
 		
 		def threadEvaluateReachability(period):
 				while not exitFlag.isSet():
+						print("in thread evaluate odoo reachability")
 						Utils.evaluateOdooReachability()   # Odoo and Wifi Status Messages are updated
 						exitFlag.wait(period)
 

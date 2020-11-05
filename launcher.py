@@ -18,6 +18,7 @@ _logger = logging.getLogger(__name__)
 
 Utils.migrationToVersion1_4_2()
 Utils.getSettingsFromDeviceCustomization()
+# Utils.initializeParameters()
 
 Buzz = PasBuz.PasBuz(PinsBuzzer)
 Disp = Display.Display()

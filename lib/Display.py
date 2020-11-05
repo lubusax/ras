@@ -11,96 +11,98 @@ from . import Utils
 _logger = logging.getLogger(__name__)
 
 class Display:
-    def __init__(self):
-        self.fontRoboto = Utils.WORK_DIR + "fonts/Roboto-Medium.ttf"
-        self.fontOrkney = Utils.WORK_DIR + "fonts/Orkney.ttf"
-        self.img_path = Utils.WORK_DIR + "images/"
-        self.device = get_device(("-d", display_driver))
-        _logger.debug("Display Class Initialized")
-        self.fontClockTime = ImageFont.truetype(self.fontRoboto, 42)
-        self.fontClockInfos = ImageFont.truetype(self.fontRoboto, 14)
-        self.font3 = ImageFont.truetype(self.fontRoboto, 22)
-        self.font4 = ImageFont.truetype(self.fontOrkney, 14)
-        self.display_msg("connecting")
-        self.lockForTheClock = False                      
+	def __init__(self):
+		self.fontRoboto = Utils.WORK_DIR + "fonts/Roboto-Medium.ttf"
+		self.fontOrkney = Utils.WORK_DIR + "fonts/Orkney.ttf"
+		self.img_path = Utils.WORK_DIR + "images/"
+		self.device = get_device(("-d", display_driver))
+		_logger.debug("Display Class Initialized")
+		self.fontClockTime = ImageFont.truetype(self.fontRoboto, 42)
+		self.fontClockInfos = ImageFont.truetype(self.fontRoboto, 14)
+		self.font3 = ImageFont.truetype(self.fontRoboto, 22)
+		self.font4 = ImageFont.truetype(self.fontOrkney, 14)
+		self.display_msg("connecting")
+		self.lockForTheClock = False                      
 
-    def displayTime(self):
-        if not self.lockForTheClock:
-            with canvas(self.device) as draw:
-                hour = time.strftime("%H:%M", time.localtime())
-                num_ones = hour.count("1")
-                if num_ones == 0:
-                    draw.text((10, 9), hour, font=self.fontClockTime, fill="white")
-                elif num_ones == 1:
-                    draw.text((10, 9), hour, font=self.fontClockTime, fill="white")
-                elif num_ones == 2:
-                    draw.text((10, 9), hour, font=self.fontClockTime, fill="white")
-                elif num_ones == 3:
-                    draw.text((12, 9), hour, font=self.fontClockTime, fill="white")
-                else:
-                    draw.text((12, 9), hour, font=self.fontClockTime, fill="white")
-                draw.text((0, 0), "WiFi " +"\n"*7+"-"*19, font=self.fontClockInfos, fill="white", align="center")
-                draw.text((0, 0), Utils.parameters["wifiStable"] +"\n"*7+"-"*23, font=self.font4, fill="white", align="center")
-                draw.text((0, 51), Utils.parameters["odooReachabilityMessage"] +"\n"*2+"-"*26, font=self.fontClockInfos, fill="white", align="center")   
+	def displayTime(self):
+		if not self.lockForTheClock:
+			with canvas(self.device) as draw:
+				hour = time.strftime("%H:%M", time.localtime())
+				num_ones = hour.count("1")
+				if num_ones == 0:
+						draw.text((10, 9), hour, font=self.fontClockTime, fill="white")
+				elif num_ones == 1:
+						draw.text((10, 9), hour, font=self.fontClockTime, fill="white")
+				elif num_ones == 2:
+						draw.text((10, 9), hour, font=self.fontClockTime, fill="white")
+				elif num_ones == 3:
+						draw.text((12, 9), hour, font=self.fontClockTime, fill="white")
+				else:
+						draw.text((12, 9), hour, font=self.fontClockTime, fill="white")
+				draw.text((0, 0), "WiFi " +"\n"*7+"-"*19, font=self.fontClockInfos, fill="white", align="center")
+				try:
+					draw.text((0, 0), Utils.parameters["wifiSignalQualityMessage"] +"\n"*7+"-"*23, font=self.font4, fill="white", align="center")
+					draw.text((0, 51), Utils.parameters["odooReachabilityMessage"] +"\n"*2+"-"*26, font=self.fontClockInfos, fill="white", align="center")   
+				except Exception as e:
+					print("exception in display time : ", e)
 
-    def showCard(self,card):
-        with canvas(self.device) as draw:
-            try:
-                draw.text(15, 20, card, font=self.font3, fill="white")
-            except BaseException:
-                draw.text((15, 20), card, font=self.font3, fill="white")
+	def showCard(self,card):
+		with canvas(self.device) as draw:
+			try:
+				draw.text(15, 20, card, font=self.font3, fill="white")
+			except BaseException:
+				draw.text((15, 20), card, font=self.font3, fill="white")
 
-    def displayLogo(self):
-        logo = Image.open(self.img_path + "thingsLogo04_128.png").convert("RGBA")
-        fff = Image.new(logo.mode, logo.size, (0,) * 4)
+	def displayLogo(self):
+		logo = Image.open(self.img_path + "thingsLogo04_128.png").convert("RGBA")
+		fff = Image.new(logo.mode, logo.size, (0,) * 4)
 
-        background = Image.new("RGBA", self.device.size, "black")
-        posn = ((self.device.width - logo.width) // 2, 0)
+		background = Image.new("RGBA", self.device.size, "black")
+		posn = ((self.device.width - logo.width) // 2, 0)
 
-        img = Image.composite(logo, fff, logo)
-        background.paste(img, posn)
-        self.device.display(background.convert(self.device.mode))
+		img = Image.composite(logo, fff, logo)
+		background.paste(img, posn)
+		self.device.display(background.convert(self.device.mode))
 
-    def displayGreetings(self):
+	def displayGreetings(self):
+		self.displayLogo()
+		time.sleep(2.4)
+		self.display_msg("welcome")
+		time.sleep(1.2)
+		self.clear_display()
 
-        self.displayLogo()
-        time.sleep(2.4)
-        self.display_msg("welcome")
-        time.sleep(1.2)
-        self.clear_display()
-
-    def displayMsgRaw(self, message):
-        origin = message[0]
-        size = message[1]
-        text = message[2]
-        font = ImageFont.truetype(self.fontRoboto, size)
-        with canvas(self.device) as draw:
-            draw.multiline_text(origin, text, fill="white", font=font, align="center")
-        _logger.debug("Displaying message: " + text)
+	def displayMsgRaw(self, message):
+		origin = message[0]
+		size = message[1]
+		text = message[2]
+		font = ImageFont.truetype(self.fontRoboto, size)
+		with canvas(self.device) as draw:
+				draw.multiline_text(origin, text, fill="white", font=font, align="center")
+		_logger.debug("Displaying message: " + text)
 
 
-    #@Utils.timer
-    def display_msg(self, textKey, employee_name = None):
-        #self.clear_display()
-        message = Utils.getMsgTranslated(textKey)
-        if '-EmployeePlaceholder-' in message[2]:
-            if employee_name and Utils.settings["showEmployeeName"] == "yes":
-                employeeName = employee_name.split(" ",1)
-                firstName = employeeName[0][0:14]
-                lastName = employeeName[1][0:14]         
-                message[2] = message[2].replace('-EmployeePlaceholder-',firstName+"\n"+lastName,1)
-            else:
-                message[2] =  "\n"+ message[2].replace('-EmployeePlaceholder-',"")
-        if '-SSIDresetPlaceholder-' in message[2]:
-            message[2] =  message[2].replace('-SSIDresetPlaceholder-',Utils.settings["SSIDreset"])
-        self.displayMsgRaw(message)
+	#@Utils.timer
+	def display_msg(self, textKey, employee_name = None):
+		#self.clear_display()
+		message = Utils.getMsgTranslated(textKey)
+		if '-EmployeePlaceholder-' in message[2]:
+			if employee_name and Utils.settings["showEmployeeName"] == "yes":
+				employeeName = employee_name.split(" ",1)
+				firstName = employeeName[0][0:14]
+				lastName = employeeName[1][0:14]         
+				message[2] = message[2].replace('-EmployeePlaceholder-',firstName+"\n"+lastName,1)
+			else:
+				message[2] =  "\n"+ message[2].replace('-EmployeePlaceholder-',"")
+		if '-SSIDresetPlaceholder-' in message[2]:
+			message[2] =  message[2].replace('-SSIDresetPlaceholder-',Utils.settings["SSIDreset"])
+		self.displayMsgRaw(message)
     
-    def displayWithIP(self, textKey):
-        message = Utils.getMsgTranslated(textKey)
-        message[2] = message[2].replace("-IpPlaceholder-",Utils.getOwnIpAddress(),1)
-        self.displayMsgRaw(message)
+	def displayWithIP(self, textKey):
+		message = Utils.getMsgTranslated(textKey)
+		message[2] = message[2].replace("-IpPlaceholder-",Utils.getOwnIpAddress(),1)
+		self.displayMsgRaw(message)
 
-    def clear_display(self):
-        with canvas(self.device) as draw:
-            draw.multiline_text((0, 0), " ")
-            _logger.debug("Clear display")
+	def clear_display(self):
+		with canvas(self.device) as draw:
+			draw.multiline_text((0, 0), " ")
+			_logger.debug("Clear display")

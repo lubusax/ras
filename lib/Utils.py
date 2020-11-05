@@ -240,6 +240,7 @@ def getMsg(textKey):
 
 def getMsgTranslated(textKey):
   try:
+    print("textkey in getMsgTranslated ", textkey)
     msgTranslated = getMsg(textKey)[settings["language"]]       
     return copy.deepcopy(msgTranslated)
   except:
@@ -312,6 +313,12 @@ def migrationToVersion1_4_2():
 
   except Exception as e:
     print("Exception in method Utils.migrationToVersion1_4_2 while trying to transfer data.json to deviceCustomization file: ", e)
+
+def initializeParameters():
+  parameters["wifiSignalQualityMessage"]  = getMsgTranslated("noWiFiSignal")[2]
+  parameters["wifiStable"] = False
+  parameters["odooReachability"] = OdooState.notDefined
+  parameters["odooReachabilityMessage"] = getMsgTranslated(parameters["odooReachability"].name)[2]
 
 def isOdooUsingHTTPS():
   if  "https" in settings["odooParameters"].keys():
@@ -401,25 +408,33 @@ def evaluateWlan0Stability():
 
 #@Utils.timer
 def evaluateOdooReachability():
-  evaluateWlan0Stability()
+  try:
+    evaluateWlan0Stability()
 
-  parameters["odooIpPortOpen"]  = isIpPortOpen(parameters["odooIpPort"])
+    parameters["odooIpPortOpen"]  = isIpPortOpen(settings["odooIpPort"])
 
-  if not parameters["wifiStable"]:
-    parameters["odooReachability"] = State.noInternet
-  elif not parameters["odooIpPortOpen"]:
-    parameters["odooReachability"] = State.instanceDown
-  elif not parameters["odooUid"]:
-    parameters["odooReachability"] = State.userNotValidAnymore
-  else:
-    parameters["odooReachability"] = State.syncClockable            
+    if not parameters["wifiStable"]:
+      parameters["odooReachability"] = OdooState.noInternet
+    elif not parameters["odooIpPortOpen"]:
+      parameters["odooReachability"] = OdooState.instanceDown
+    elif not parameters["odooUid"]:
+      parameters["odooReachability"] = OdooState.userNotValidAnymore
+    else:
+      parameters["odooReachability"] = OdooState.syncClockable            
 
-  print("odooIpPortOpen ", parameters["odooIpPortOpen"])
-  print("wifiStable ", parameters["wifiStable"])
+    print("odooIpPortOpen ", parameters["odooIpPortOpen"])
+    print("wifiStable ", parameters["wifiStable"])
+    print("odooReachability State Name ", parameters["odooReachability"].name)
 
-  parameters["odooReachabilityMessage"] = getMsgTranslated(parameters["odooReachability"].name)[2]
+    parameters["odooReachabilityMessage"] = getMsgTranslated(parameters["odooReachability"].name)[2]
 
-  print("odooReachabilityMessage", odooReachabilityMessage)
+    print("odooReachabilityMessage", odooReachabilityMessage)
+  except Exception as e:
+    print("exception in evaluateOdooReachability ", e)
+    parameters["odooIpPortOpen"]    = False
+    parameters["wifiStable"]        = False
+    parameters["odooReachability"]  = OdooState.notDefined
+
 
 def setOdooIpPort():
   settings["odooIpPort"] = None
