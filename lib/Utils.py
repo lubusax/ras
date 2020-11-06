@@ -27,14 +27,14 @@ defaultCredentialsDic         = {"username": ["admin"], "new password": ["admin"
 
 @unique
 class OdooState(Enum): # Odoo Reachability State
-    notDefined              =auto()
+    toBeDefined             =auto()
     syncClockable           =auto()
     instanceDown            =auto()
     noInternet              =auto()
     userNotValidAnymore     =auto()
 
 # syncClockingMethods = {
-#   "notDefined"          : self.notDefined  ,
+#   "toBeDefined"          : self.toBeDefined  ,
 #   "syncClockable"       : self.syncClockable  ,
 #   "instanceDown"        : self.instanceDown  ,
 #   "noInternet"          : self.noInternet  ,
@@ -42,7 +42,7 @@ class OdooState(Enum): # Odoo Reachability State
 # }
 
 # asyncClockingMethods = {
-#   "notDefined"          : self.asyncClocking  ,
+#   "toBeDefined"          : self.asyncClocking  ,
 #   "syncClockable"       : self.syncClockable  ,
 #   "instanceDown"        : self.asyncClocking ,
 #   "noInternet"          : self.asyncClocking  ,
@@ -226,7 +226,7 @@ def getSettingsFromDeviceCustomization():
   settings["ssh"]                     = getOptionFromDeviceCustomization("ssh"                      , defaultValue = "enable")
   settings["sshPassword"]             = getOptionFromDeviceCustomization("sshPassword"              , defaultValue = "raspberry")  
   settings["firmwareVersion"]         = getOptionFromDeviceCustomization("firmwareVersion"          , defaultValue = "v1.4.3+")
-  settings["timeoutToCheckAttendance"]          = getOptionFromDeviceCustomization("timeoutToCheckAttendance" , defaultValue = 3.0)
+  settings["timeoutToRegisterAttendanceSync"]   = getOptionFromDeviceCustomization("timeoutToRegisterAttendanceSync" , defaultValue = 3.0)
   settings["periodEvaluateReachability"]        = getOptionFromDeviceCustomization("periodEvaluateReachability" , defaultValue = 5.0)
   settings["periodDisplayClock"]                = getOptionFromDeviceCustomization("periodDisplayClock" , defaultValue = 10.0)
   settings["timeToDisplayResultAfterClocking"]  = getOptionFromDeviceCustomization("timeToDisplayResultAfterClocking", defaultValue = 1.2)
@@ -242,10 +242,11 @@ def getMsg(textKey):
 
 def getMsgTranslated(textKey):
   try:
-    print("textkey in getMsgTranslated ", textkey)
+    print("textKey in getMsgTranslated ", textKey)
     msgTranslated = getMsg(textKey)[settings["language"]]       
     return copy.deepcopy(msgTranslated)
-  except:
+  except Exception as e:
+    print("in getMsgTranslated() exception: ", e)
     if textKey == "listOfLanguages":
       return ["ENGLISH"]
     else:
@@ -319,9 +320,15 @@ def migrationToVersion1_4_2():
 def initializeParameters():
   parameters["wifiSignalQualityMessage"]  = getMsgTranslated("noWiFiSignal")[2]
   parameters["wifiStable"] = False
-  parameters["odooReachability"] = OdooState.notDefined
+  parameters["odooReachability"] = OdooState.toBeDefined
   parameters["odooReachabilityMessage"] = getMsgTranslated(parameters["odooReachability"].name)[2]
   parameters["odooUid"] = None
+  odooReachabilityMessage = parameters["odooReachability"].name
+
+  print("i was in Utils.initializeParameters() - parameters[odooReachability].name ", parameters["odooReachability"].name)
+  print("i was in Utils.initializeParameters() - getMsgTranslated(parameters[odooReachability].name) ",
+      type(odooReachabilityMessage), odooReachabilityMessage)
+  
   print("i was in Utils.initializeParameters() - wifiSignalQualityMessage: ", parameters["wifiSignalQualityMessage"])
   print("i was in Utils.initializeParameters() - odooReachabilityMessage: ", parameters["odooReachabilityMessage"])
  
@@ -421,6 +428,8 @@ def evaluateOdooReachability():
   try:
     evaluateWlan0Stability()
 
+    print("in evaluateOdooReachability(), settings[odooIpPort] ", settings["odooIpPort"] )
+
     parameters["odooIpPortOpen"]  = isIpPortOpen(settings["odooIpPort"])
 
     if not parameters["wifiStable"]:
@@ -438,12 +447,12 @@ def evaluateOdooReachability():
 
     parameters["odooReachabilityMessage"] = getMsgTranslated(parameters["odooReachability"].name)[2]
 
-    print("odooReachabilityMessage", odooReachabilityMessage)
+    print("odooReachabilityMessage", parameters["odooReachabilityMessage"])
   except Exception as e:
     print("exception in evaluateOdooReachability ", e)
     parameters["odooIpPortOpen"]    = False
     parameters["wifiStable"]        = False
-    parameters["odooReachability"]  = OdooState.notDefined
+    parameters["odooReachability"]  = OdooState.toBeDefined
 
 
 def setOdooIpPort():

@@ -51,6 +51,32 @@
       "Contactez votre\n Responsable\nInformatique\n\n---------------------"
     ]
   },
+  "ENGLISH": {
+    "ENGLISH": [
+      [
+        0,
+        6
+      ],
+      15,
+      "\nENGLISH\n\n\n--------------------------"
+    ],
+    "ESPA\u00d1OL": [
+      [
+        0,
+        6
+      ],
+      15,
+      "\nENGLISH\n\n\n--------------------------"
+    ],
+    "FRAN\u00c7AIS": [
+      [
+        0,
+        6
+      ],
+      15,
+      "\nENGLISH\n\n\n--------------------------"
+    ]
+  },
   "ERRUpdate": {
     "ENGLISH": [
       [
@@ -77,6 +103,32 @@
       "Mise \u00e0 jour\nimpossible, GitHub\nne r\u00e9pond pas\n\n---------------"
     ]
   },
+  "ESPA\u00d1OL": {
+    "ENGLISH": [
+      [
+        0,
+        6
+      ],
+      15,
+      "\nESPA\u00d1OL\n\n\n--------------------------"
+    ],
+    "ESPA\u00d1OL": [
+      [
+        0,
+        6
+      ],
+      15,
+      "\nESPA\u00d1OL\n\n\n--------------------------"
+    ],
+    "FRAN\u00c7AIS": [
+      [
+        0,
+        6
+      ],
+      15,
+      "\nESPA\u00d1OL\n\n\n--------------------------"
+    ]
+  },
   "FALSE": {
     "ENGLISH": [
       [
@@ -101,6 +153,32 @@
       ],
       21,
       "BADGE NON\n RECONNU\n\n------------------"
+    ]
+  },
+  "FRAN\u00c7AIS": {
+    "ENGLISH": [
+      [
+        0,
+        6
+      ],
+      15,
+      "\nFRAN\u00c7AIS\n\n\n--------------------------"
+    ],
+    "ESPA\u00d1OL": [
+      [
+        0,
+        6
+      ],
+      15,
+      "\nFRAN\u00c7AIS\n\n\n--------------------------"
+    ],
+    "FRAN\u00c7AIS": [
+      [
+        0,
+        6
+      ],
+      15,
+      "\nFRAN\u00c7AIS\n\n\n--------------------------"
     ]
   },
   "browseForNewAdminCard": {
@@ -233,160 +311,30 @@
       "appuyez sur OK\npour changer\n la LANGUE\n\n---------------------"
     ]
   },
-  "notDefined": {
-    "ENGLISH": [
-      [
-        0,
-        0
-      ],
-      14,
-      "please wait\n-----------------\n"
-    ],
-    "ESPA\u00d1OL": [
-      [
-        0,
-        0
-      ],
-      14,
-      "espere, por favor\n-----------------\n"
-    ],
-    "FRAN\u00c7AIS": [
-      [
-        0,
-        0
-      ],
-      14,
-      "veuillez patienter\n-------------------------\n"
-    ]
-  },
-  "syncClockable": {
-    "ENGLISH": [
-      [
-        0,
-        0
-      ],
-      14,
-      "Odoo connected\n-------------------------\n"
-    ],
-    "ESPA\u00d1OL": [
-      [
-        0,
-        0
-      ],
-      14,
-      "Odoo conectado\n-------------------------\n"
-    ],
-    "FRAN\u00c7AIS": [
-      [
-        0,
-        0
-      ],
-      14,
-      "Odoo connect\u00e9\n------------------------\n"
-    ]
-  },
-  "instanceDown": {
-    "ENGLISH": [
-      [
-        0,
-        0
-      ],
-      14,
-      "Odoo is down\n-------------------------\n"
-    ],
-    "ESPA\u00d1OL": [
-      [
-        0,
-        0
-      ],
-      14,
-      "Odoo inactivo\n-------------------------\n"
-    ],
-    "FRAN\u00c7AIS": [
-      [
-        0,
-        0
-      ],
-      14,
-      "Odoo en panne\n------------------------\n"
-    ]
-  },
-  "noInternet": {
-    "ENGLISH": [
-      [
-        0,
-        0
-      ],
-      14,
-      "no internet\n-------------------------\n"
-    ],
-    "ESPA\u00d1OL": [
-      [
-        0,
-        0
-      ],
-      14,
-      "sin internet\n-------------------------\n"
-    ],
-    "FRAN\u00c7AIS": [
-      [
-        0,
-        0
-      ],
-      14,
-      "pas d´Internet\n------------------------\n"
-    ]
-  },
-  "userNotValidAnymore": {
-    "ENGLISH": [
-      [
-        0,
-        0
-      ],
-      14,
-      "define user again\n-------------------------\n"
-    ],
-    "ESPA\u00d1OL": [
-      [
-        0,
-        0
-      ],
-      14,
-      "definir usuario de nuevo\n-------------------------\n"
-    ],
-    "FRAN\u00c7AIS": [
-      [
-        0,
-        0
-      ],
-      14,
-      "définir ´user´ à nouveau\n------------------------\n"
-    ]
-  },
   "clockScreen_databaseNotConnected": {
     "ENGLISH": [
       [
         0,
         0
       ],
-      14,
-      "Odoo disconnected\n-----------------\n"
+      10,
+      "ODOO DISCONNECTED\n-------------------------------------------\n"
     ],
     "ESPA\u00d1OL": [
       [
         0,
         0
       ],
-      14,
-      "Odoo desconectado\n-----------------\n"
+      10,
+      "ODOO DESCONECTADO\n-----------------\n"
     ],
     "FRAN\u00c7AIS": [
       [
         0,
         0
       ],
-      14,
-      "Odoo d\u00e9connect\u00e9\n-------------------------\n"
+      10,
+      "ODOO D\u00c9CONNECT\u00c9\n-------------------------\n"
     ]
   },
   "clockScreen_databaseOK": {
@@ -395,24 +343,24 @@
         0,
         0
       ],
-      14,
-      "Odoo connected\n-------------------------\n"
+      10,
+      "ODOO CONNECTED\n-------------------------------------------\n"
     ],
     "ESPA\u00d1OL": [
       [
         0,
         0
       ],
-      14,
-      "Odoo conectado\n-------------------------\n"
+      10,
+      "ODOO CONECTADO\n-------------------------\n"
     ],
     "FRAN\u00c7AIS": [
       [
         0,
         0
       ],
-      14,
-      "Odoo connect\u00e9\n------------------------\n"
+      10,
+      "ODOO CONNECT\u00c9\n------------------------\n"
     ]
   },
   "clocking": {
@@ -623,89 +571,37 @@
       "Connexion \u00e9tablie\navec votre\nserveur Odoo\n\n-----------------"
     ]
   },
+  "instanceDown": {
+    "ENGLISH": [
+      [
+        0,
+        0
+      ],
+      10,
+      "ODOO NOT RESPONDING\n-------------------------------------------\n"
+    ],
+    "ESPA\u00d1OL": [
+      [
+        0,
+        0
+      ],
+      10,
+      "ODOO NO RESPONDE\n-----------------------------\n"
+    ],
+    "FRAN\u00c7AIS": [
+      [
+        0,
+        0
+      ],
+      10,
+      "ODOO NE R\u00c9POND PAS\n----------------------------\n"
+    ]
+  },
   "listOfLanguages": [
     "ENGLISH",
     "ESPA\u00d1OL",
     "FRAN\u00c7AIS"
   ],
-  "ENGLISH": {
-    "ENGLISH": [
-      [
-        0,
-        6
-      ],
-      15,
-      "\nENGLISH\n\n\n--------------------------"
-    ],
-    "ESPA\u00d1OL": [
-      [
-        0,
-        6
-      ],
-      15,
-      "\nENGLISH\n\n\n--------------------------"
-    ],
-    "FRAN\u00c7AIS": [
-      [
-        0,
-        6
-      ],
-      15,
-      "\nENGLISH\n\n\n--------------------------"
-    ]
-  },
-  "ESPA\u00d1OL": {
-    "ENGLISH": [
-      [
-        0,
-        6
-      ],
-      15,
-      "\nESPA\u00d1OL\n\n\n--------------------------"
-    ],
-    "ESPA\u00d1OL": [
-      [
-        0,
-        6
-      ],
-      15,
-      "\nESPA\u00d1OL\n\n\n--------------------------"
-    ],
-    "FRAN\u00c7AIS": [
-      [
-        0,
-        6
-      ],
-      15,
-      "\nESPA\u00d1OL\n\n\n--------------------------"
-    ]
-  },
-  "FRAN\u00c7AIS": {
-    "ENGLISH": [
-      [
-        0,
-        6
-      ],
-      15,
-      "\nFRAN\u00c7AIS\n\n\n--------------------------"
-    ],
-    "ESPA\u00d1OL": [
-      [
-        0,
-        6
-      ],
-      15,
-      "\nFRAN\u00c7AIS\n\n\n--------------------------"
-    ],
-    "FRAN\u00c7AIS": [
-      [
-        0,
-        6
-      ],
-      15,
-      "\nFRAN\u00c7AIS\n\n\n--------------------------"
-    ]
-  },
   "newAdmCardDefined": {
     "ENGLISH": [
       [
@@ -756,6 +652,32 @@
       ],
       24,
       "NON\n\n\n----------------"
+    ]
+  },
+  "noInternet": {
+    "ENGLISH": [
+      [
+        0,
+        0
+      ],
+      10,
+      "NO INTERNET\n--------------------------------------------\n"
+    ],
+    "ESPA\u00d1OL": [
+      [
+        0,
+        0
+      ],
+      10,
+      "SIN INTERNET\n--------------------------------------------\n"
+    ],
+    "FRAN\u00c7AIS": [
+      [
+        0,
+        0
+      ],
+      10,
+      "PAS D'INTERNET\n-------------------------------------------\n"
     ]
   },
   "noRouteToHost": {
@@ -816,24 +738,24 @@
         0,
         0
       ],
-      14,
-      "No WiFi signal\n-------------------------\n"
+      10,
+      "NO WIFI SIGNAL\n\n\n\n\n-------------------------------------------\n"
     ],
     "ESPA\u00d1OL": [
       [
         0,
         0
       ],
-      14,
-      "No hay se\u00f1al WiFi\n-------------------------\n"
+      10,
+      "NO HAY SE\u00d1AL WIFI\n\n\n\n\n-------------------\n"
     ],
     "FRAN\u00c7AIS": [
       [
         0,
         0
       ],
-      14,
-      "Aucun Signal WIFI\n-------------------------\n"
+      10,
+      "AUCUN SIGNAL WIFI\n\n\n\n\n-------------------\n"
     ]
   },
   "no_wifi": {
@@ -1200,6 +1122,58 @@
       "Veuillez\npr\u00e9senter\nvotre badge\n\n---------------------"
     ]
   },
+  "syncClockable": {
+    "ENGLISH": [
+      [
+        0,
+        0
+      ],
+      10,
+      "ODOO CONNECTED\n-------------------------------------------\n"
+    ],
+    "ESPA\u00d1OL": [
+      [
+        0,
+        0
+      ],
+      10,
+      "ODOO CONECTADO\n-------------------------\n"
+    ],
+    "FRAN\u00c7AIS": [
+      [
+        0,
+        0
+      ],
+      10,
+      "ODOO CONNECT\u00c9\n------------------------\n"
+    ]
+  },
+  "toBeDefined": {
+    "ENGLISH": [
+      [
+        0,
+        0
+      ],
+      10,
+      "PLEASE WAIT\n-------------------------------------------\n"
+    ],
+    "ESPA\u00d1OL": [
+      [
+        0,
+        0
+      ],
+      10,
+      "ESPERE POR FAVOR\n-----------------\n"
+    ],
+    "FRAN\u00c7AIS": [
+      [
+        0,
+        0
+      ],
+      10,
+      "VEUILLEZ PATIENTER\n-------------------------\n"
+    ]
+  },
   "update": {
     "ENGLISH": [
       [
@@ -1250,6 +1224,32 @@
       ],
       17,
       "appuyez sur OK\npour mettre \u00e0\njour le Firmware\n\n---------------------"
+    ]
+  },
+  "userNotValidAnymore": {
+    "ENGLISH": [
+      [
+        0,
+        0
+      ],
+      10,
+      "REDEFINE USER\n-------------------------------------------\n"
+    ],
+    "ESPA\u00d1OL": [
+      [
+        0,
+        0
+      ],
+      10,
+      "REDEFINA EL USUARIO\n-----------------------------\n"
+    ],
+    "FRAN\u00c7AIS": [
+      [
+        0,
+        0
+      ],
+      10,
+      "RED\u00c9FINIR L'UTILISATEUR\n----------------------------\n"
     ]
   },
   "wait": {

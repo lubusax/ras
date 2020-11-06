@@ -19,7 +19,7 @@ class Display:
 		print("in Display class init: self.device is ", self.device)
 		_logger.debug("Display Class Initialized")
 		self.fontClockTime = ImageFont.truetype(self.fontRoboto, 42)
-		self.fontClockInfos = ImageFont.truetype(self.fontRoboto, 14)
+		self.fontClockInfos = ImageFont.truetype(self.fontRoboto, 10)
 		self.font3 = ImageFont.truetype(self.fontRoboto, 22)
 		self.font4 = ImageFont.truetype(self.fontOrkney, 14)
 		self.display_msg("connecting")
@@ -31,19 +31,23 @@ class Display:
 				hour = time.strftime("%H:%M", time.localtime())
 				num_ones = hour.count("1")
 				if num_ones == 0:
-						draw.text((10, 9), hour, font=self.fontClockTime, fill="white")
+						draw.text((10, 10), hour, font=self.fontClockTime, fill="white")
 				elif num_ones == 1:
-						draw.text((10, 9), hour, font=self.fontClockTime, fill="white")
+						draw.text((10, 10), hour, font=self.fontClockTime, fill="white")
 				elif num_ones == 2:
-						draw.text((10, 9), hour, font=self.fontClockTime, fill="white")
+						draw.text((10, 10), hour, font=self.fontClockTime, fill="white")
 				elif num_ones == 3:
-						draw.text((12, 9), hour, font=self.fontClockTime, fill="white")
+						draw.text((12, 10), hour, font=self.fontClockTime, fill="white")
 				else:
-						draw.text((12, 9), hour, font=self.fontClockTime, fill="white")
-				draw.text((0, 0), "WiFi " +"\n"*7+"-"*19, font=self.fontClockInfos, fill="white", align="center")
+						draw.text((12, 10), hour, font=self.fontClockTime, fill="white")
+
 				try:
-					draw.text((0, 0), Utils.parameters["wifiSignalQualityMessage"] +"\n"*7+"-"*23, font=self.font4, fill="white", align="center")
-					draw.text((0, 51), Utils.parameters["odooReachabilityMessage"] +"\n"*2+"-"*26, font=self.fontClockInfos, fill="white", align="center")   
+					if Utils.parameters["wifiSignalQualityMessage"]== Utils.getMsgTranslated("noWiFiSignal")[2]:
+						draw.text((0, 0), Utils.parameters["wifiSignalQualityMessage"], font=self.fontClockInfos, fill="white", align="center")
+					else:	
+						draw.text((0, 0), "WiFi " +"\n"*7+"-"*32, font=self.fontClockInfos, fill="white", align="center")
+						draw.text((0, 0), Utils.parameters["wifiSignalQualityMessage"] +"\n"*7+"-"*23, font=self.font4, fill="white", align="center")
+					draw.text((0, 54), Utils.parameters["odooReachabilityMessage"] +"\n"*2+"-"*26, font=self.fontClockInfos, fill="white", align="center")   
 				except Exception as e:
 					print("exception in display time : ", e)
 
@@ -99,7 +103,7 @@ class Display:
 		self.displayMsgRaw(message)
     
 	def displayWithIP(self, textKey):
-		print("i was in displaywithIP ")
+		print("i was in displaywithIP - textKey: ", textKey)
 		message = Utils.getMsgTranslated(textKey)
 		message[2] = message[2].replace("-IpPlaceholder-",Utils.getOwnIpAddress(),1)
 		self.displayMsgRaw(message)

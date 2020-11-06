@@ -19,7 +19,7 @@ class OdooXMLrpc:
     def __init__(self, Display):
         self.display            = Display
         self.adm                = False
-        Utils.parameters["odooReachability"] = Utils.OdooState.notDefined
+        Utils.parameters["odooReachability"] = Utils.OdooState.toBeDefined
         Utils.parameters["odooIpPortOpen"]   = False
         Utils.parameters["odooUid"] = False
         self.getUIDfromOdoo()
@@ -32,6 +32,8 @@ class OdooXMLrpc:
         Utils.setOdooUrlTemplate()
         Utils.setOdooIpPort()
         self.setUserID()
+        if not Utils.parameters["odooUid"] and not Utils.settings["odooConnectedAtLeastOnce"]:
+            Utils.resetOdooParams()
         print("getUIDfromOdoo - got user id from Odoo ", Utils.parameters["odooUid"] )                                                                  
          
     #@Utils.timer
@@ -85,8 +87,8 @@ class OdooXMLrpc:
         try:
             serverProxy = Utils.getServerProxy("/xmlrpc/object")
             if serverProxy:
-                setTimeout(float(Utils.settings["timeoutToregisterAttendanceSync"]) or None)
-                #print("timeoutToregisterAttendanceSync: ", float(Utils.settings["timeoutToregisterAttendanceSync"]) or None )
+                setTimeout(float(Utils.settings["timeoutToRegisterAttendanceSync"]) or None)
+                #print("timeoutToRegisterAttendanceSync: ", float(Utils.settings["timeoutToRegisterAttendanceSync"]) or None )
                 res = serverProxy.execute(
                     Utils.settings["odooParameters"]["db"][0],
                     Utils.parameters["odooUid"],

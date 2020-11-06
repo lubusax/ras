@@ -68,7 +68,7 @@ class Clocking:
 		self.employeeName  = None
 
 		print("clocking method ", Utils.parameters["odooReachability"])
-		self.syncClockingMethods[Utils.parameters["odooReachability"]]()
+		self.syncClockingMethods[Utils.parameters["odooReachability"].name]()
 		
 		self.Disp.display_msg(self.msg, self.employeeName)
 		self.Buzz.Play(self.msg)

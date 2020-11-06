@@ -283,7 +283,7 @@ class Tasks:
 			print("i was in getOdooUIDwithNewParameters and parameters[wifiStable] is :", Utils.parameters["wifiStable"])
 			Utils.evaluateWlan0Stability()
 			if Utils.parameters["wifiStable"]:
-				self.Disp.displayWithIP('browseForNewOdooParams')
+				self.Disp.displayWithIP("browseForNewOdooParams")
 
 				print("i was in 2 ------")
 
