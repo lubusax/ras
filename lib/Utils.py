@@ -18,6 +18,8 @@ fileDeviceCustomization       = WORK_DIR + "dicts/deviceCustomization.json"
 fileDeviceCustomizationSample = WORK_DIR + "dicts/deviceCustomization.sample.json"
 fileDataJson                  = WORK_DIR + "dicts/data.json"
 fileCredentials               = WORK_DIR + "dicts/credentials.json"
+dirAttendanceData             = WORK_DIR + "attendanceData/"
+fileKnownRFIDcards            = dirAttendanceData + "knownRFIDcards.json"
 
 settings                      = {} # settings are more permanent than parameters, they are user defined and stored in a file 
 parameters                    = {} # parameters change more frequently and show the different states in the device
@@ -225,12 +227,13 @@ def getSettingsFromDeviceCustomization():
   settings["timeoutToGetOdooUID"]     = getOptionFromDeviceCustomization("timeoutToGetOdooUID"      , defaultValue = 6.0)
   settings["ssh"]                     = getOptionFromDeviceCustomization("ssh"                      , defaultValue = "enable")
   settings["sshPassword"]             = getOptionFromDeviceCustomization("sshPassword"              , defaultValue = "raspberry")  
-  settings["firmwareVersion"]         = getOptionFromDeviceCustomization("firmwareVersion"          , defaultValue = "v1.4.3+")
-  settings["timeoutToRegisterAttendanceSync"]   = getOptionFromDeviceCustomization("timeoutToRegisterAttendanceSync" , defaultValue = 3.0)
-  settings["periodEvaluateReachability"]        = getOptionFromDeviceCustomization("periodEvaluateReachability" , defaultValue = 5.0)
-  settings["periodDisplayClock"]                = getOptionFromDeviceCustomization("periodDisplayClock" , defaultValue = 10.0)
-  settings["timeToDisplayResultAfterClocking"]  = getOptionFromDeviceCustomization("timeToDisplayResultAfterClocking", defaultValue = 1.2)
-  settings["asyncClockingEnabled"]                = getOptionFromDeviceCustomization("asyncClockingEnabled", defaultValue = False)
+  settings["firmwareVersion"]         = getOptionFromDeviceCustomization("firmwareVersion"          , defaultValue = "v1.4.4+")
+  settings["timeoutToRegisterAttendanceSync"]   = getOptionFromDeviceCustomization("timeoutToRegisterAttendanceSync"  , defaultValue = 3.0)
+  settings["periodEvaluateReachability"]        = getOptionFromDeviceCustomization("periodEvaluateReachability"       , defaultValue = 5.0)
+  settings["periodDisplayClock"]                = getOptionFromDeviceCustomization("periodDisplayClock"               , defaultValue = 10.0)
+  settings["timeToDisplayResultAfterClocking"]  = getOptionFromDeviceCustomization("timeToDisplayResultAfterClocking" , defaultValue = 1.2)
+  settings["clockingSyncOrAsync"]                = getOptionFromDeviceCustomization("clockingSyncOrAsync"           , defaultValue = "sync")
+  settings["periodSyncOStime"]                    = getOptionFromDeviceCustomization("periodSyncOStime"               , defaultValue = 3610)
 
 def getMsg(textKey):
   try:
@@ -286,7 +289,7 @@ def handleMigratioOfDeviceCustomizationFile():
   newOptionsList = ["SSIDreset","fileForMessages","firmwareVersion","ssh",
         "sshPassword", "timeoutToGetOdooUID", "timeoutToCheckAttendance",
         "periodEvaluateReachability", "periodDisplayClock", "timeToDisplayResultAfterClocking",
-        "asyncClockingEnabled" ]
+        "clockingSyncOrAsync", "periodSyncOStime" ]
   if deviceCustomizationDic:
     for option in newOptionsList:
       if not(option in deviceCustomizationDic) and (option in deviceCustomizationSampleDic):
@@ -303,9 +306,19 @@ def handleMigrationOfCredentialsJson():
     credentialsDic = defaultCredentialsDic
   storeOptionInDeviceCustomization("flask",credentialsDic)
 
+def ensureNtplibModule():
+  print("in module ensureNtplibModule")
+  try:
+    import ntplib
+  except ImportError:
+    print("trying to install ntplib module")
+    os.system("sudo pip3 install ntplib")
+    print("module ntplib installed!")
+
 def migrationToVersion1_4_2():
   handleMigratioOfDeviceCustomizationFile()
   handleMigrationOfCredentialsJson()
+  ensureNtplibModule()
   try:
     data = getJsonData(fileDataJson)
     print("read dict from data.json in method Utils.migrationToVersion1_4_2 ", data)
@@ -323,12 +336,23 @@ def initializeParameters():
   parameters["odooReachability"] = OdooState.toBeDefined
   parameters["odooReachabilityMessage"] = getMsgTranslated(parameters["odooReachability"].name)[2]
   parameters["odooUid"] = None
-  odooReachabilityMessage = parameters["odooReachability"].name
+  parameters["callsUntilSyncOStime"] = -1
+  odooReachabilityMessage      = parameters["odooReachability"].name
+  parameters["knownRFIDcards"] = getJsonData(fileKnownRFIDcards)
+  if not parameters["knownRFIDcards"]:
+    print("i was in Utils.initializeParameters() - trying to create fileKnownRFIDcards")
+    parameters["knownRFIDcards"] ={}
+    try:
+      os.mkdir(dirAttendanceData)
+    except FileExistsError:
+      try: 
+        os.mknod(fileKnownRFIDcards)
+      except FileExistsError:
+        print("i was in Utils.initializeParameters() - fileKnownRFIDcards existed already")
 
+
+  print("i was in Utils.initializeParameters() - parameters[knownRFIDcards]", parameters["knownRFIDcards"])
   print("i was in Utils.initializeParameters() - parameters[odooReachability].name ", parameters["odooReachability"].name)
-  print("i was in Utils.initializeParameters() - getMsgTranslated(parameters[odooReachability].name) ",
-      type(odooReachabilityMessage), odooReachabilityMessage)
-  
   print("i was in Utils.initializeParameters() - wifiSignalQualityMessage: ", parameters["wifiSignalQualityMessage"])
   print("i was in Utils.initializeParameters() - odooReachabilityMessage: ", parameters["odooReachabilityMessage"])
  
@@ -437,6 +461,7 @@ def evaluateOdooReachability():
     elif not parameters["odooIpPortOpen"]:
       parameters["odooReachability"] = OdooState.instanceDown
     elif not parameters["odooUid"]:
+      #setuserID and then test again
       parameters["odooReachability"] = OdooState.userNotValidAnymore
     else:
       parameters["odooReachability"] = OdooState.syncClockable            
@@ -509,5 +534,21 @@ def getServerProxy(url):
 def resetOdooParams():
   storeOptionInDeviceCustomization("odooConnectedAtLeastOnce", False)
   storeOptionInDeviceCustomization("odooParameters", None)
-  
 
+def syncOStimeWithTimeServer():
+  try:
+    import ntplib
+    client = ntplib.NTPClient()
+    response = client.request('pool.ntp.org')
+    os.system('date ' + time.strftime('%m%d%H%M%Y.%S',time.localtime(response.tx_time)))
+    print('in syncWithTimeServer - Succesfully sync :', response.tx_time)    
+  except Exception as e:
+    print('in syncWithTimeServer - Could not sync with time server. Exception:', e)
+
+def syncOStimeWhenStipulated():
+  if parameters["callsUntilSyncOStime"] <0:
+    parameters["callsUntilSyncOStime"] = int(settings["periodSyncOStime"]/settings["periodDisplayClock"])+1 
+    syncOStimeWithTimeServer()
+  else:
+    parameters["callsUntilSyncOStime"] -= 1
+  print('in syncOStimeWhenStipulated - callsUntilSyncOStime at exit', parameters["callsUntilSyncOStime"])  

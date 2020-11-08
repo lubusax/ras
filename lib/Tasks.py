@@ -162,6 +162,7 @@ class Tasks:
 		def threadDisplayClock(period):
 			while not exitFlag.isSet():
 				#print("messages", self.Clock.wifiSignalQualityMessage, self.Clock.odooReachabilityMessage)
+				Utils.syncOStimeWhenStipulated()
 				if not self.Disp.lockForTheClock:	
 					self.Disp.displayTime() 
 				exitFlag.wait(period)

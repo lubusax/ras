@@ -10,6 +10,8 @@
   "fileForMessages": "messagesDicDefault.json",
   "firmwareVersion": "v1.4.3",
   "language": "ENGLISH",
+  "clockingSyncOrAsync": "sync",
+  "periodSyncOStime": 3610,
   "manufacturingData": {
     "firmwareAtShipment": "prior to v1.4.2",
     "productName": "RAS2",

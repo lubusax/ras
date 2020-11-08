@@ -17,7 +17,9 @@ class Clocking:
 		self.B_Down = hardware[3]  # Button Down
 		self.B_OK = hardware[4]  # Button OK
 
-		self.syncClockingMethods = {
+		self.clockingMethods = {}
+
+		self.clockingMethods["sync"] = {
 			"notDefined"          : self.notDefined  ,
 			"syncClockable"       : self.syncClockable  ,
 			"instanceDown"        : self.instanceDown  ,
@@ -25,21 +27,30 @@ class Clocking:
 			"userNotValidAnymore" : self.userNotValidAnymore  ,
 		}
 
-		self.asyncClockingMethods = {
+		self.clockingMethods["async"] = {
 			"notDefined"          : self.asyncClocking  ,
 			"syncClockable"       : self.syncClockable  ,
-			"instanceDown"        : self.asyncClocking ,
+			"instanceDown"        : self.asyncClocking  ,
 			"noInternet"          : self.asyncClocking  ,
 			"userNotValidAnymore" : self.asyncClocking  ,
 		}
 
+	def registerLocally(self, card, employeeName, checkINorCheckOUT):
+		Utils.parameters["knownRFIDcards"][card] = {"employeeName": employeeName, "checkINorCheckOUT": checkINorCheckOUT }
+		print("in registerLocally - registered for card:", card, "Utils.parameters[knownRFIDcards][card]: ", Utils.parameters["knownRFIDcards"][card])
+		Utils.storeJsonData(Utils.fileKnownRFIDcards,Utils.parameters["knownRFIDcards"])
+
 	#@Utils.timer
 	def syncClockable(self):
 		try:
-			res = self.Odoo.registerAttendanceSync(self.Reader.card)
+			now = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime() )
+			print( "in syncClockable - now: ", now)
+			res = self.Odoo.registerAttendanceSync(self.Reader.card, now)
 			if res:
 				self.employeeName = res["employee_name"]
 				self.msg = res["action"]
+				print("in syncClockable - res: ", res)
+				self.registerLocally(self.Reader.card, self.employeeName, res["action"])
 			else:
 				self.msg = "comm_failed"
 		except Exception as e:
@@ -68,7 +79,7 @@ class Clocking:
 		self.employeeName  = None
 
 		print("clocking method ", Utils.parameters["odooReachability"])
-		self.syncClockingMethods[Utils.parameters["odooReachability"].name]()
+		self.clockingMethods[Utils.settings["clockingSyncOrAsync"]][Utils.parameters["odooReachability"].name]()
 		
 		self.Disp.display_msg(self.msg, self.employeeName)
 		self.Buzz.Play(self.msg)

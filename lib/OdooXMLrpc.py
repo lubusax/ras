@@ -82,7 +82,7 @@ class OdooXMLrpc:
             return returnValue
 
     #@Utils.timer
-    def registerAttendanceSync(self, card):
+    def registerAttendanceSync(self, card, timestamp):
         res=False
         try:
             serverProxy = Utils.getServerProxy("/xmlrpc/object")
@@ -96,6 +96,7 @@ class OdooXMLrpc:
                     "hr.employee",
                     "register_attendance",
                     card,
+                    timestamp,
                 )
         except Exception as e:
             print("Odoo ln127 - registerAttendanceSync - exception e:",e)
