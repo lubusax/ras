@@ -33,8 +33,8 @@ class Clocking:
 					"userNotValidAnymore" : self.asynchronousHandler
 				}
 			}
-	def registerLocally(self, card, employeeName, checkINorCheckOUT):
-		Utils.parameters["knownRFIDcards"][card] = {"employeeName": employeeName, "checkINorCheckOUT": checkINorCheckOUT }
+	def registerLastAttendanceLocally(self, card, attendanceId, employeeName, checkINorCheckOUT):
+		Utils.parameters["knownRFIDcards"][card] = {"attendanceId": attendanceId, "employeeName": employeeName, "checkINorCheckOUT": checkINorCheckOUT }
 		print("in registerLocally - registered for card:", card, "Utils.parameters[knownRFIDcards][card]: ", Utils.parameters["knownRFIDcards"][card])
 		Utils.storeJsonData(Utils.fileKnownRFIDcards,Utils.parameters["knownRFIDcards"])
 
@@ -42,14 +42,16 @@ class Clocking:
 	def asynchronousHandler(self): 
 		print( "in asyncClocking ")
 		try:
-			now = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime() )
+			attendanceId = time.strftime("%Y%m%d%H%M%S", time.gmtime() )
+			now = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime() )			
+			print( "in asyncClocking - attendanceId: ", attendanceId)
 			print( "in asyncClocking - now: ", now)
 			res = self.Odoo.registerAttendanceWithRASownTimestamp(self.Reader.card, now)
 			if res:
 				self.employeeName = res["employee_name"]
 				self.msg = res["action"]
 				print("in syncClockable - res: ", res)
-				self.registerLocally(self.Reader.card, self.employeeName, res["action"])
+				self.registerLastAttendanceLocally(self.Reader.card, attendanceId, self.employeeName, res["action"])
 			else:
 				self.msg = "comm_failed"
 		except Exception as e:
@@ -63,7 +65,8 @@ class Clocking:
 				self.employeeName = res["employee_name"]
 				self.msg = res["action"]
 				print("in syncClockable - res: ", res)
-				self.registerLocally(self.Reader.card, self.employeeName, res["action"])
+				attendanceId = time.strftime("%Y%m%d%H%M%S", time.gmtime() )
+				self.registerLocally(self.Reader.card, attendanceId, self.employeeName, res["action"])
 			else:
 				self.msg = "comm_failed"
 		except Exception as e:
