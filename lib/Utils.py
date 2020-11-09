@@ -11,6 +11,8 @@ import xmlrpc.client as xmlrpclib
 
 from enum import Enum, unique, auto
 
+from socket import setdefaulttimeout as setTimeout
+
 from dicts import tz_dic
 
 WORK_DIR                      = "/home/pi/ras/"
@@ -446,7 +448,6 @@ def evaluateWlan0Stability():
   print("i was in Utils.evaluateWlan0Stability() - wifiSignalQualityMessage: ", parameters["wifiSignalQualityMessage"])
   print("i was in Utils.evaluateWlan0Stability() - odooReachabilityMessage: ", parameters["odooReachabilityMessage"])
 
-
 #@Utils.timer
 def evaluateOdooReachability():
   try:
@@ -460,9 +461,12 @@ def evaluateOdooReachability():
       parameters["odooReachability"] = OdooState.noInternet
     elif not parameters["odooIpPortOpen"]:
       parameters["odooReachability"] = OdooState.instanceDown
-    elif not parameters["odooUid"]:
-      #setuserID and then test again
-      parameters["odooReachability"] = OdooState.userNotValidAnymore
+    elif not parameters["odooUid"]:   
+      setUserID()
+      if parameters["odooUid"]:
+        parameters["odooReachability"] = OdooState.syncClockable
+      else:         
+        parameters["odooReachability"] = OdooState.userNotValidAnymore
     else:
       parameters["odooReachability"] = OdooState.syncClockable            
 
@@ -478,7 +482,6 @@ def evaluateOdooReachability():
     parameters["odooIpPortOpen"]    = False
     parameters["wifiStable"]        = False
     parameters["odooReachability"]  = OdooState.toBeDefined
-
 
 def setOdooIpPort():
   settings["odooIpPort"] = None
@@ -507,6 +510,7 @@ def setTimeZone():
 
 def setOdooUrlTemplate():
   try:
+    
     if isOdooUsingHTTPS():
       settings["odooUrlTemplate"] = "https://%s" % settings["odooParameters"]["odoo_host"][0]
     else:
@@ -528,7 +532,6 @@ def getServerProxy(url):
     return serverProxy
   except Exception as e:
     print("exception in serverProxy :", e)
-    _logger.exception(e)
     return False 
 
 def resetOdooParams():
@@ -552,3 +555,53 @@ def syncOStimeWhenStipulated():
   else:
     parameters["callsUntilSyncOStime"] -= 1
   print('in syncOStimeWhenStipulated - callsUntilSyncOStime at exit', parameters["callsUntilSyncOStime"])  
+
+#@timer
+def setUserID():
+  parameters["odooUid"] = None
+  returnValue = False
+  try:
+    loginServerProxy = getServerProxy("/xmlrpc/common")
+    setTimeout(float(settings["timeoutToGetOdooUID"]) or None)
+    print("timeoutToGetOdooUID: ", float(settings["timeoutToGetOdooUID"]) or None )
+    user_id = loginServerProxy.login(
+      settings["odooParameters"]["db"][0],
+      settings["odooParameters"]["user_name"][0],
+      settings["odooParameters"]["user_password"][0])
+    if user_id:
+        #print("_"*80)
+        print("setUserID - got user id from Odoo ", user_id)
+        #print("_"*80)
+        parameters["odooUid"] = user_id
+        storeOptionInDeviceCustomization("odooConnectedAtLeastOnce", True)
+        returnValue =  True
+    else:
+        print("NO user id from Odoo ", user_id)
+        returnValue =  False
+  except ConnectionRefusedError as e:
+      print("ConnectionRefusedError registerAttendanceSync odoo ln139", e)
+      returnValue =  False
+  except socket.timeout as e:
+      print("timeout registerAttendanceSync odoo ln139", e)
+      returnValue = False
+  except OSError as osError:
+      print("osError Utils.setuserID ", osError)
+      # if "No route to host" in str(osError): pass
+      returnValue =  False 
+  except Exception as e:
+      print("exception in method setUserID: ", e)
+      returnValue =  False
+  finally:
+      setTimeout(None)
+      return returnValue
+
+#@timer
+def getUIDfromOdoo():
+    #print("in method getUIDfromOdoo , the Odoo Params are: ", settings["odooParameters"])
+    setTimeZone()
+    setOdooUrlTemplate()
+    setOdooIpPort()
+    setUserID()
+    if not parameters["odooUid"] and not settings["odooConnectedAtLeastOnce"]:
+      resetOdooParams()
+    #print("getUIDfromOdoo - got user id from Odoo ", parameters["odooUid"] )
