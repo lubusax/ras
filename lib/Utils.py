@@ -216,7 +216,7 @@ def storeOptionInDeviceCustomization(option,value):
   except:
     return False
 
-def getSettingsFromDeviceCustomization():
+def initializeSettings(): # getSettingsFromDeviceCustomization
   settings["language"]                = getOptionFromDeviceCustomization("language"                 , defaultValue = "ENGLISH")
   settings["showEmployeeName"]        = getOptionFromDeviceCustomization("showEmployeeName"         , defaultValue = "yes")
   settings["fileForMessages"]         = getOptionFromDeviceCustomization("fileForMessages"          , defaultValue = "messagesDicDefault.json")
@@ -317,20 +317,16 @@ def ensureNtplibModule():
     os.system("sudo pip3 install ntplib")
     print("module ntplib installed!")
 
-def migrationToVersion1_4_2():
-  handleMigratioOfDeviceCustomizationFile()
-  handleMigrationOfCredentialsJson()
-  ensureNtplibModule()
+def handleMigrationOfDataJson():
   try:
     data = getJsonData(fileDataJson)
-    print("read dict from data.json in method Utils.migrationToVersion1_4_2 ", data)
+    print("in handleMigrationOfDataJson - read dict from data.json", data)
     if data and storeOptionInDeviceCustomization("odooParameters",data): # in data.json the Odoo Params are stored when a successful connection was made
       if os.path.isfile(Utils.fileDataJson):
         os.system("sudo rm " + Utils.fileDataJson)
       storeOptionInDeviceCustomization("odooConnectedAtLeastOnce", True)
-
   except Exception as e:
-    print("Exception in method Utils.migrationToVersion1_4_2 while trying to transfer data.json to deviceCustomization file: ", e)
+    print("in handleMigrationOfDataJson - Exception while trying to transfer data.json to deviceCustomization file: ", e)
 
 def initializeParameters():
   parameters["wifiSignalQualityMessage"]  = getMsgTranslated("noWiFiSignal")[2]
@@ -338,11 +334,14 @@ def initializeParameters():
   parameters["odooReachability"] = OdooState.toBeDefined
   parameters["odooReachabilityMessage"] = getMsgTranslated(parameters["odooReachability"].name)[2]
   parameters["odooUid"] = None
+  parameters["odooIpPortOpen"]   = False
   parameters["callsUntilSyncOStime"] = -1
   odooReachabilityMessage      = parameters["odooReachability"].name
+
+def initializeKnownRFIDCards():
   parameters["knownRFIDcards"] = getJsonData(fileKnownRFIDcards)
   if not parameters["knownRFIDcards"]:
-    print("i was in Utils.initializeParameters() - trying to create fileKnownRFIDcards")
+    print("in Utils.initializeParameters() - trying to create fileKnownRFIDcards")
     parameters["knownRFIDcards"] ={}
     try:
       os.mkdir(dirAttendanceData)
@@ -350,15 +349,14 @@ def initializeParameters():
       try: 
         os.mknod(fileKnownRFIDcards)
       except FileExistsError:
-        print("i was in Utils.initializeParameters() - fileKnownRFIDcards existed already")
+        print("in Utils.initializeParameters() - fileKnownRFIDcards existed already")
 
 
-  print("i was in Utils.initializeParameters() - parameters[knownRFIDcards]", parameters["knownRFIDcards"])
-  print("i was in Utils.initializeParameters() - parameters[odooReachability].name ", parameters["odooReachability"].name)
-  print("i was in Utils.initializeParameters() - wifiSignalQualityMessage: ", parameters["wifiSignalQualityMessage"])
-  print("i was in Utils.initializeParameters() - odooReachabilityMessage: ", parameters["odooReachabilityMessage"])
+  print("in Utils.initializeParameters() - parameters[knownRFIDcards]", parameters["knownRFIDcards"])
+  print("in Utils.initializeParameters() - parameters[odooReachability].name ", parameters["odooReachability"].name)
+  print("in Utils.initializeParameters() - wifiSignalQualityMessage: ", parameters["wifiSignalQualityMessage"])
+  print("in Utils.initializeParameters() - odooReachabilityMessage: ", parameters["odooReachabilityMessage"])
  
-
 def isOdooUsingHTTPS():
   if  "https" in settings["odooParameters"].keys():
     if settings["odooParameters"]["https"]== ["https"]:
@@ -445,8 +443,8 @@ def evaluateWlan0Stability():
     parameters["wifiSignalQualityMessage"]  = getMsgTranslated("noWiFiSignal")[2]
     parameters["wifiStable"] = False
 
-  print("i was in Utils.evaluateWlan0Stability() - wifiSignalQualityMessage: ", parameters["wifiSignalQualityMessage"])
-  print("i was in Utils.evaluateWlan0Stability() - odooReachabilityMessage: ", parameters["odooReachabilityMessage"])
+  print("in Utils.evaluateWlan0Stability() - wifiSignalQualityMessage: ", parameters["wifiSignalQualityMessage"])
+  print("in Utils.evaluateWlan0Stability() - odooReachabilityMessage: ", parameters["odooReachabilityMessage"])
 
 #@Utils.timer
 def evaluateOdooReachability():
@@ -492,7 +490,7 @@ def setOdooIpPort():
     elif isOdooUsingHTTPS():
         portNumber =   443
     settings["odooIpPort"] = (settings["odooParameters"]["odoo_host"][0], portNumber)
-    print("i was in setOdooIpPort() ", settings["odooIpPort"])
+    print("in setOdooIpPort() ", settings["odooIpPort"])
     return True
   except Exception as e:
     print("exception in method setOdooIpPort: ", e)
@@ -502,7 +500,7 @@ def setTimeZone():
   try:
     os.environ["TZ"] = tz_dic.tz_dic[settings["odooParameters"]["timezone"][0]]
     time.tzset()
-    print("i was in setTimeZone() tz:", tz_dic.tz_dic[settings["odooParameters"]["timezone"][0]])
+    print("in setTimeZone() tz:", tz_dic.tz_dic[settings["odooParameters"]["timezone"][0]])
     return True
   except Exception as e:
     print("exception in method setTimeZone: ", e)
@@ -518,7 +516,7 @@ def setOdooUrlTemplate():
 
     if settings["odooParameters"]["odoo_port"][0]:
       settings["odooUrlTemplate"] += ":%s" % settings["odooParameters"]["odoo_port"][0]
-    print("i was in setOdooUrlTemplate() - settings[odooUrlTemplate] ",settings["odooUrlTemplate"] )
+    print("in setOdooUrlTemplate() - settings[odooUrlTemplate] ",settings["odooUrlTemplate"] )
     return True
   except Exception as e:
     settings["odooUrlTemplate"]    = None
@@ -528,7 +526,7 @@ def setOdooUrlTemplate():
 def getServerProxy(url):
   try:
     serverProxy = xmlrpclib.ServerProxy(settings["odooUrlTemplate"] + str(url))
-    print("i was in serverProxy etServerProxy(url): ", serverProxy)
+    print("in serverProxy etServerProxy(url): ", serverProxy)
     return serverProxy
   except Exception as e:
     print("exception in serverProxy :", e)
@@ -605,3 +603,77 @@ def getUIDfromOdoo():
     if not parameters["odooUid"] and not settings["odooConnectedAtLeastOnce"]:
       resetOdooParams()
     #print("getUIDfromOdoo - got user id from Odoo ", parameters["odooUid"] )
+
+#@timer
+def registerAttendanceWithRASownTimestamp(card, timestamp):
+  res=False
+  try:
+    serverProxy = getServerProxy("/xmlrpc/object")
+    if serverProxy:
+      setTimeout(float(settings["timeoutToRegisterAttendanceSync"]) or None)
+      res = serverProxy.execute(
+        settings["odooParameters"]["db"][0],
+        parameters["odooUid"],
+        settings["odooParameters"]["user_password"][0],
+        "hr.employee",
+        "registerAttendanceWithExternalTimestamp",
+        card,
+        timestamp,
+        )
+  except Exception as e:
+      print("registerAttendanceWithRASownTimestamp - exception e:",e)
+      res = False
+  except socket.timeout as e:
+      print("timeout registerAttendanceWithRASownTimestamp", e)
+      res=False
+  finally:
+      setTimeout(None)
+      return res
+
+def registerAttendanceSync(self, card):
+  res=False
+  try:
+    serverProxy = getServerProxy("/xmlrpc/object")
+    if serverProxy:
+      setTimeout(float(settings["timeoutToRegisterAttendanceSync"]) or None)
+      #print("timeoutToRegisterAttendanceSync: ", float(settings["timeoutToRegisterAttendanceSync"]) or None )
+      res = serverProxy.execute(
+        settings["odooParameters"]["db"][0],
+        parameters["odooUid"],
+        settings["odooParameters"]["user_password"][0],
+        "hr.employee",
+        "register_attendance",
+        card,
+        )
+  except Exception as e:
+    print("registerAttendanceSync - exception e:",e)
+    res = False
+  except socket.timeout as e:
+    print("timeout registerAttendanceSync - ", e)
+    res=False
+  finally:
+    setTimeout(None)
+    return res
+
+def migrationToCurrentVersion():
+  handleMigratioOfDeviceCustomizationFile()
+  handleMigrationOfCredentialsJson()
+  handleMigrationOfDataJson()
+  ensureNtplibModule()
+
+def initializeDevice():
+  migrationToCurrentVersion()
+  initializeSettings()
+  initializeParameters()
+  initializeKnownRFIDCards()
+  getUIDfromOdoo()
+
+def attendanceIDtoTimestamp(id):
+  try:
+    now= id[0:4]+"-"+id[4:6]+"-"+id[6:8]+" "+id[8:10]+":"+id[10:12]+":"+id[12:]
+  except Exception as e:
+    print("exception in attendanceIDtoTimestamp - e:", e)
+    now= False
+  finally:
+    return now
+

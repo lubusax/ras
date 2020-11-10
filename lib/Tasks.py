@@ -10,16 +10,14 @@ from dicts.ras_dic import ask_twice, FIRMWARE_VERSION
 _logger = logging.getLogger(__name__)
 
 class Tasks:
-	def __init__(self, Odoo, Hardware):
-		self.card = False  # currently swipped card code
-		self.Odoo = Odoo
+	def __init__(self, Hardware):
 		self.Buzz = Hardware[0]  # Passive Buzzer
 		self.Disp = Hardware[1]  # Display
 		self.Reader = Hardware[2]  # Card Reader
 		self.B_Down = Hardware[3]  # Button Down
 		self.B_OK = Hardware[4]  # Button OK
 
-		self.Clock = Clocking.Clocking(Odoo, Hardware)
+		self.Clock = Clocking.Clocking(Hardware)
 		self.ask_twice = ask_twice  # list of tasks to ask 'are you sure?' upon selection
 
 		self.periodPollCardReader 							= 0.2  # second
@@ -107,10 +105,9 @@ class Tasks:
 		self.Disp.display_msg("newAdmCardDefined")
 
 		data = Utils.settings["odooParameters"]
-		self.Odoo.adm = data["admin_id"][0]
+
 		self.Buzz.Play("back_to_menu")
 
-		self.card = False  # avoid closed loop
 		self.nextTask = self.defaultNextTask
 
 		time.sleep(1.3)
@@ -228,7 +225,6 @@ class Tasks:
 
 		pollCardReader.join()
 
-		self.card = False  # avoid closed loop
 		self.nextTask = self.defaultNextTask
 
 	def updateFirmware(self):
@@ -313,7 +309,7 @@ class Tasks:
 				pollCardReader.join()
 				serverKiller.join()
 
-				self.Odoo.getUIDfromOdoo()
+				Utils.getUIDfromOdoo()
 
 				self.Disp.lockForTheClock = True
 				if Utils.parameters["odooUid"]:

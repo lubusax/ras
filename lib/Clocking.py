@@ -9,8 +9,8 @@ from . import routes, Utils
 _logger = logging.getLogger(__name__)
 
 class Clocking:
-	def __init__(self, odoo, hardware):
-		self.Odoo = odoo
+	def __init__(self, hardware):
+
 		self.Buzz = hardware[0]  # Passive Buzzer
 		self.Disp = hardware[1]  # Display
 		self.Reader = hardware[2]  # Card Reader
@@ -33,40 +33,62 @@ class Clocking:
 					"userNotValidAnymore" : self.asynchronousHandler
 				}
 			}
-	def registerLastAttendanceLocally(self, card, attendanceId, employeeName, checkINorCheckOUT):
-		Utils.parameters["knownRFIDcards"][card] = {"attendanceId": attendanceId, "employeeName": employeeName, "checkINorCheckOUT": checkINorCheckOUT }
+		
+		self.action = {
+			"check_in": "check_out",
+			"check_out": "check_in",
+			"FALSE":"FALSE"
+		}
+
+	def registerLastAttendanceLocally(self, card, attendanceID, employeeName, checkINorCheckOUT):
+		Utils.parameters["knownRFIDcards"][card] = {"attendanceID": attendanceID, "employeeName": employeeName, "checkINorCheckOUT": checkINorCheckOUT }
 		print("in registerLocally - registered for card:", card, "Utils.parameters[knownRFIDcards][card]: ", Utils.parameters["knownRFIDcards"][card])
 		Utils.storeJsonData(Utils.fileKnownRFIDcards,Utils.parameters["knownRFIDcards"])
 
 	#@Utils.timer
 	def asynchronousHandler(self): 
-		print( "in asyncClocking ")
+		print( "in asynchronousHandler ")
 		try:
-			attendanceId = time.strftime("%Y%m%d%H%M%S", time.gmtime() )
-			now = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime() )			
-			print( "in asyncClocking - attendanceId: ", attendanceId)
-			print( "in asyncClocking - now: ", now)
-			res = self.Odoo.registerAttendanceWithRASownTimestamp(self.Reader.card, now)
-			if res:
-				self.employeeName = res["employee_name"]
-				self.msg = res["action"]
-				print("in syncClockable - res: ", res)
-				self.registerLastAttendanceLocally(self.Reader.card, attendanceId, self.employeeName, res["action"])
-			else:
-				self.msg = "comm_failed"
+			attendanceID = time.strftime("%Y%m%d%H%M%S", time.gmtime() )
+			now = Utils.attendanceIDtoTimestamp(attendanceID)			
+			print( "in asynchronousHandler - attendanceID: ", attendanceID)
+			print( "in asynchronousHandler - now: ", now)
+			card = self.Reader.card
+			self.employeeName = Utils.parameters["knownRFIDcards"][card]["employeeName"]
+			self.msg = self.action[Utils.parameters["knownRFIDcards"][card]["checkINorCheckOUT"]]
+			self.registerLastAttendanceLocally(card, attendanceID, self.employeeName, self.msg)
+			#self.storeAttendanceInOdoo(card, attendanceID)
 		except Exception as e:
-				print("exception in dotheclocking e:", e)
+			print("exception in asynchronousHandler e:", e)
+
+	def storeAttendanceInOdoo(self, card, attendanceID): 
+		print( "in storeAttendanceInOdoo ")
+		try:
+			timestamp = Utils.attendanceIDtoTimestamp(attendanceID)			
+			print( "in storeAttendanceInOdoo - card: ", card)
+			print( "in storeAttendanceInOdoo - timestamp: ", timestamp)
+			res = Utils.registerAttendanceWithRASownTimestamp(card, timestamp)
+			if res:
+				print("in storeAttendanceInOdoo - res: ", res)
+				success = True
+			else:
+				success = False
+		except Exception as e:
+			print("exception in storeAttendanceInOdoo e:", e)
+			success = False
+		finally:
+			return success
 
 	#@Utils.timer
 	def syncClocking(self):
 		try:
-			res = self.Odoo.registerAttendanceSync(self.Reader.card)
+			res = Utils.registerAttendanceSync(self.Reader.card)
 			if res:
 				self.employeeName = res["employee_name"]
 				self.msg = res["action"]
 				print("in syncClockable - res: ", res)
-				attendanceId = time.strftime("%Y%m%d%H%M%S", time.gmtime() )
-				self.registerLocally(self.Reader.card, attendanceId, self.employeeName, res["action"])
+				attendanceID = time.strftime("%Y%m%d%H%M%S", time.gmtime() )
+				self.registerLastAttendanceLocally(self.Reader.card, attendanceID, self.employeeName, res["action"])
 			else:
 				self.msg = "comm_failed"
 		except Exception as e:
