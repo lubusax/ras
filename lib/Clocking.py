@@ -40,11 +40,6 @@ class Clocking:
 			"FALSE":"FALSE"
 		}
 
-	def registerLastAttendanceLocally(self, card, attendanceID, employeeName, checkINorCheckOUT):
-		Utils.parameters["knownRFIDcards"][card] = {"attendanceID": attendanceID, "employeeName": employeeName, "checkINorCheckOUT": checkINorCheckOUT }
-		print("in registerLocally - registered for card:", card, "Utils.parameters[knownRFIDcards][card]: ", Utils.parameters["knownRFIDcards"][card])
-		Utils.storeJsonData(Utils.fileKnownRFIDcards,Utils.parameters["knownRFIDcards"])
-
 	#@Utils.timer
 	def asynchronousHandler(self): 
 		print( "in asynchronousHandler ")
@@ -56,8 +51,8 @@ class Clocking:
 			card = self.Reader.card
 			self.employeeName = Utils.parameters["knownRFIDcards"][card]["employeeName"]
 			self.msg = self.action[Utils.parameters["knownRFIDcards"][card]["checkINorCheckOUT"]]
-			self.registerLastAttendanceLocally(card, attendanceID, self.employeeName, self.msg)
-			#self.storeAttendanceInOdoo(card, attendanceID)
+			Utils.registerLastAttendanceInFile(card, attendanceID, self.employeeName, self.msg)
+			#self.storeAttendanceInFileToSendItToOdooLater(card, attendanceID, self.msg)
 		except Exception as e:
 			print("exception in asynchronousHandler e:", e)
 
@@ -88,7 +83,7 @@ class Clocking:
 				self.msg = res["action"]
 				print("in syncClockable - res: ", res)
 				attendanceID = time.strftime("%Y%m%d%H%M%S", time.gmtime() )
-				self.registerLastAttendanceLocally(self.Reader.card, attendanceID, self.employeeName, res["action"])
+				Utils.registerLastAttendanceInFile(self.Reader.card, attendanceID, self.employeeName, res["action"])
 			else:
 				self.msg = "comm_failed"
 		except Exception as e:

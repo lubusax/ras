@@ -677,3 +677,10 @@ def attendanceIDtoTimestamp(id):
   finally:
     return now
 
+def registerLastAttendanceInFile(card, attendanceID, employeeName, checkINorCheckOUT):
+  parameters["knownRFIDcards"][card] = {"attendanceID": attendanceID, "employeeName": employeeName, "checkINorCheckOUT": checkINorCheckOUT }
+  print("in registerLastAttendanceInFile - registered for card:", card, "parameters[knownRFIDcards][card]: ", parameters["knownRFIDcards"][card])
+  storeJsonData(fileKnownRFIDcards,parameters["knownRFIDcards"])
+
+def storeAttendanceInFileToSendItToOdooLater(card, attendanceID, checkINorCheckOUT):
+  
