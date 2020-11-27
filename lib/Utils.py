@@ -683,4 +683,4 @@ def registerLastAttendanceInFile(card, attendanceID, employeeName, checkINorChec
   storeJsonData(fileKnownRFIDcards,parameters["knownRFIDcards"])
 
 def storeAttendanceInFileToSendItToOdooLater(card, attendanceID, checkINorCheckOUT):
-  
+  pass
