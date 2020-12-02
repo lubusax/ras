@@ -720,9 +720,11 @@ def convertLineIntoAttendance(card, line):
   return attendance
 
 def getAttendancesFromCardFile(cardFilePath):
+  print("in getAttendancesFromCardFile, cardFilePath : ", cardFilePath)  
   attendancesFromCardFile = []
   with open(cardFilePath, 'r') as f:
     lines =f.readlines()
+  print("in getAttendancesFromCardFile, lines : ", lines) 
   card = getCardFromCardFilePath(cardFilePath) ####
   for line in lines:
     attendanceFromThisLine = convertLineIntoAttendance(card, line) ####
@@ -731,10 +733,11 @@ def getAttendancesFromCardFile(cardFilePath):
 
 def getAttendancesToDispatch():
   try:
-    cardFilesToDispatch = os.listdir()
+    cardFilesToDispatch = os.listdir(dirAsyncClockings)
+    print("in getAttendancesToDispatch(), cardFilesToDispatch : ", cardFilesToDispatch)
     attendancesToDispatch = []
     for cardFile in cardFilesToDispatch:
-      attendancesFromCardFile = getAttendancesFromCardFile(cardFile)
+      attendancesFromCardFile = getAttendancesFromCardFile( dirAsyncClockings + cardFile)
       attendancesToDispatch = attendancesToDispatch.extend(attendancesFromCardFile)
     return attendancesToDispatch
   except Exception as e:
