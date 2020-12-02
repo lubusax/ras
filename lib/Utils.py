@@ -707,11 +707,23 @@ def storeAttendanceInFileToSendItToOdooLater(card, attendanceID, checkINorCheckO
   appendLineToFile(cardAttendancePathFile, attendanceLineToAppend)
   print("appended attendance "+attendanceLineToAppend+" to file "+cardAttendancePathFile)
 
-def getAttendancesFromCardFile(cardFile):
+def getCardFromCardFilePath(cardFilePath):
+  card = cardFilePath.replace(dirAsyncClockings,"")
+  return card
+
+def convertLineIntoAttendance(card, line):
+  splittedLine = line.split(",")
+  attendanceID = splittedLine[0]
+  checkINorCheckOUT = splittedLine[1]  
+  timestamp = attendanceIDtoTimestamp(attendanceID)
+  attendance =[card, timestamp, checkINorCheckOUT]
+  return attendance
+
+def getAttendancesFromCardFile(cardFilePath):
   attendancesFromCardFile = []
-  with open(cardFile, 'r') as f:
+  with open(cardFilePath, 'r') as f:
     lines =f.readlines()
-  card = getCardFromCardFilePath() ####
+  card = getCardFromCardFilePath(cardFilePath) ####
   for line in lines:
     attendanceFromThisLine = convertLineIntoAttendance(card, line) ####
     attendancesFromCardFile = attendancesFromCardFile.extend(attendanceFromThisLine)
