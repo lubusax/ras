@@ -49,10 +49,14 @@ class Clocking:
 			print( "in asynchronousHandler - attendanceID: ", attendanceID)
 			print( "in asynchronousHandler - now: ", now)
 			card = self.Reader.card
-			self.employeeName = Utils.parameters["knownRFIDcards"][card]["employeeName"]
-			self.msg = self.action[Utils.parameters["knownRFIDcards"][card]["checkINorCheckOUT"]]
+			if card in Utils.parameters["knownRFIDcards"]:
+				self.employeeName = Utils.parameters["knownRFIDcards"][card]["employeeName"]
+				self.msg = self.action[Utils.parameters["knownRFIDcards"][card]["checkINorCheckOUT"]]
+			else:
+				self.employeeName = ""
+				self.msg = "FALSE"
 			Utils.registerLastAttendanceInFile(card, attendanceID, self.employeeName, self.msg)
-			#self.storeAttendanceInFileToSendItToOdooLater(card, attendanceID, self.msg)
+			Utils.storeAttendanceInFileToSendItToOdooLater(card, attendanceID, self.msg)
 		except Exception as e:
 			print("exception in asynchronousHandler e:", e)
 

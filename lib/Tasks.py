@@ -151,10 +151,16 @@ class Tasks:
 	def clocking(self):
 		
 		def threadEvaluateReachability(period):
-				while not exitFlag.isSet():
-						print("in thread evaluate odoo reachability")
-						Utils.evaluateOdooReachability()   # Odoo and Wifi Status Messages are updated
-						exitFlag.wait(period)
+			while not exitFlag.isSet():
+				print("in thread evaluate odoo reachability")
+				Utils.evaluateOdooReachability()   # Odoo and Wifi Status Messages are updated
+				exitFlag.wait(period)
+		
+		def threadDispatchAsyncClockings(period):
+			while not exitFlag.isSet():
+				print("in thread DispatchAsyncClockings")
+				Utils.dispatchAsyncClockings()
+				exitFlag.wait(period)
 
 		def threadDisplayClock(period):
 			while not exitFlag.isSet():
@@ -167,21 +173,25 @@ class Tasks:
 		exitFlag = threading.Event()
 		exitFlag.clear()
 
-		periodEvaluateReachability = Utils.settings["periodEvaluateReachability"]   # seconds		
-		periodDisplayClock         = Utils.settings["periodDisplayClock"]  # seconds
+		periodEvaluateReachability 		= Utils.settings["periodEvaluateReachability"]   # seconds		
+		periodDisplayClock         		= Utils.settings["periodDisplayClock"]  # seconds
+		periodDispatchAsyncClockings	= Utils.settings["periodDispatchAsyncClockings"]  # seconds
 
 		evaluateReachability    = threading.Thread(target=threadEvaluateReachability, args=(periodEvaluateReachability,))
+		dispatchAsyncClockings  = threading.Thread(target=threadDispatchAsyncClockings, args=(periodDispatchAsyncClockings,))
 		pollCardReader          = threading.Thread(target=self.threadPollCardReader, args=(self.periodPollCardReader,exitFlag,self.Clock.card_logging,))
 		displayClock            = threading.Thread(target=threadDisplayClock, args=(periodDisplayClock,))
 		checkBothButtonsPressed = threading.Thread(target=self.threadCheckBothButtonsPressed, args=(
 															self.periodCheckBothButtonsPressed, self.howLongShouldBeBothButtonsPressed, exitFlag))
 
 		evaluateReachability.start()
+		dispatchAsyncClockings.start()
 		pollCardReader.start()
 		displayClock.start()
 		checkBothButtonsPressed.start()
 
 		evaluateReachability.join()
+		dispatchAsyncClockings.join()
 		pollCardReader.join()
 		displayClock.join()
 		checkBothButtonsPressed.join()

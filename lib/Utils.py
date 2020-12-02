@@ -22,6 +22,7 @@ fileDataJson                  = WORK_DIR + "dicts/data.json"
 fileCredentials               = WORK_DIR + "dicts/credentials.json"
 dirAttendanceData             = WORK_DIR + "attendanceData/"
 fileKnownRFIDcards            = dirAttendanceData + "knownRFIDcards.json"
+dirAsyncClockings             = dirAttendanceData + "asyncClockings/"
 
 settings                      = {} # settings are more permanent than parameters, they are user defined and stored in a file 
 parameters                    = {} # parameters change more frequently and show the different states in the device
@@ -233,9 +234,10 @@ def initializeSettings(): # getSettingsFromDeviceCustomization
   settings["timeoutToRegisterAttendanceSync"]   = getOptionFromDeviceCustomization("timeoutToRegisterAttendanceSync"  , defaultValue = 3.0)
   settings["periodEvaluateReachability"]        = getOptionFromDeviceCustomization("periodEvaluateReachability"       , defaultValue = 5.0)
   settings["periodDisplayClock"]                = getOptionFromDeviceCustomization("periodDisplayClock"               , defaultValue = 10.0)
+  settings["periodDispatchAsyncClockings"]      = getOptionFromDeviceCustomization("periodDispatchAsyncClockings"     , defaultValue = 120.0)  
   settings["timeToDisplayResultAfterClocking"]  = getOptionFromDeviceCustomization("timeToDisplayResultAfterClocking" , defaultValue = 1.2)
-  settings["clockingSyncOrAsync"]                = getOptionFromDeviceCustomization("clockingSyncOrAsync"           , defaultValue = "sync")
-  settings["periodSyncOStime"]                    = getOptionFromDeviceCustomization("periodSyncOStime"               , defaultValue = 3610)
+  settings["clockingSyncOrAsync"]               = getOptionFromDeviceCustomization("clockingSyncOrAsync"              , defaultValue = "sync")
+  settings["periodSyncOStime"]                  = getOptionFromDeviceCustomization("periodSyncOStime"                 , defaultValue = 3610)
 
 def getMsg(textKey):
   try:
@@ -630,7 +632,7 @@ def registerAttendanceWithRASownTimestamp(card, timestamp):
       setTimeout(None)
       return res
 
-def registerAttendanceSync(self, card):
+def registerAttendanceSync(card):
   res=False
   try:
     serverProxy = getServerProxy("/xmlrpc/object")
@@ -682,5 +684,57 @@ def registerLastAttendanceInFile(card, attendanceID, employeeName, checkINorChec
   print("in registerLastAttendanceInFile - registered for card:", card, "parameters[knownRFIDcards][card]: ", parameters["knownRFIDcards"][card])
   storeJsonData(fileKnownRFIDcards,parameters["knownRFIDcards"])
 
+def getCardAttendancePathFile(card):
+  if not os.path.exists(dirAsyncClockings):
+    os.mkdir(dirAsyncClockings)  
+  cardAttendancePathFile = dirAsyncClockings + card.lower()
+  print("filetype "+card+ " : "+cardAttendancePathFile)
+  if not os.path.exists(cardAttendancePathFile):
+    with open(cardAttendancePathFile, 'w') as f: 
+      pass
+  return cardAttendancePathFile
+
+def appendLineToFile(pathFile,lineToAppend):
+  with open(pathFile, 'a') as f: 
+    f.write(str(lineToAppend+"\n"))
+
+def getAttendanceLineFromAttendanceParameters(attendanceID, checkINorCheckOUT):
+  return attendanceID+","+checkINorCheckOUT
+
 def storeAttendanceInFileToSendItToOdooLater(card, attendanceID, checkINorCheckOUT):
-  pass
+  cardAttendancePathFile = getCardAttendancePathFile(card)
+  attendanceLineToAppend = getAttendanceLineFromAttendanceParameters(attendanceID, checkINorCheckOUT)
+  appendLineToFile(cardAttendancePathFile, attendanceLineToAppend)
+  print("appended attendance "+attendanceLineToAppend+" to file "+cardAttendancePathFile)
+
+def getAttendancesFromCardFile(cardFile):
+  attendancesFromCardFile = []
+  with open(cardFile, 'r') as f:
+    lines =f.readlines()
+  card = getCardFromCardFilePath() ####
+  for line in lines:
+    attendanceFromThisLine = convertLineIntoAttendance(card, line) ####
+    attendancesFromCardFile = attendancesFromCardFile.extend(attendanceFromThisLine)
+  return attendancesFromCardFile
+
+def getAttendancesToDispatch():
+  try:
+    cardFilesToDispatch = os.listdir()
+    attendancesToDispatch = []
+    for cardFile in cardFilesToDispatch:
+      attendancesFromCardFile = getAttendancesFromCardFile(cardFile)
+      attendancesToDispatch = attendancesToDispatch.extend(attendancesFromCardFile)
+    return attendancesToDispatch
+  except Exception as e:
+    print("exception in getAttendancesToDispatch() :", e)
+    return []
+
+def removeAllAttendancesFiles():
+  os.system("sudo rm "+dirAsyncClockings+"*")
+
+def dispatchAsyncClockings():
+  print("in dispatchAsyncClockings(), settings[periodDispatchAsyncClockings] ", settings["periodDispatchAsyncClockings"] )
+  attendancesToDispatch = getAttendancesToDispatch()
+  print("")
+  print("attendancesToDispatch ", attendancesToDispatch)
+  removeAllAttendancesFiles()
