@@ -32,14 +32,14 @@ defaultCredentialsDic         = {"username": ["admin"], "new password": ["admin"
 
 @unique
 class OdooState(Enum): # Odoo Reachability State
-    toBeDefined             =auto()
+    notDefined              =auto()
     syncClockable           =auto()
     instanceDown            =auto()
     noInternet              =auto()
     userNotValidAnymore     =auto()
 
 # syncClockingMethods = {
-#   "toBeDefined"          : self.toBeDefined  ,
+#   "notDefined"          : self.notDefined  ,
 #   "syncClockable"       : self.syncClockable  ,
 #   "instanceDown"        : self.instanceDown  ,
 #   "noInternet"          : self.noInternet  ,
@@ -47,7 +47,7 @@ class OdooState(Enum): # Odoo Reachability State
 # }
 
 # asyncClockingMethods = {
-#   "toBeDefined"          : self.asyncClocking  ,
+#   "notDefined"          : self.asyncClocking  ,
 #   "syncClockable"       : self.syncClockable  ,
 #   "instanceDown"        : self.asyncClocking ,
 #   "noInternet"          : self.asyncClocking  ,
@@ -232,6 +232,7 @@ def initializeSettings(): # getSettingsFromDeviceCustomization
   settings["sshPassword"]             = getOptionFromDeviceCustomization("sshPassword"              , defaultValue = "raspberry")  
   settings["firmwareVersion"]         = getOptionFromDeviceCustomization("firmwareVersion"          , defaultValue = "v1.4.4+")
   settings["timeoutToRegisterAttendanceSync"]   = getOptionFromDeviceCustomization("timeoutToRegisterAttendanceSync"  , defaultValue = 3.0)
+  settings["timeoutToRegisterMultipleAsyncAttendances"]   = getOptionFromDeviceCustomization("timeoutToRegisterMultipleAsyncAttendances"  , defaultValue = 10.0)  
   settings["periodEvaluateReachability"]        = getOptionFromDeviceCustomization("periodEvaluateReachability"       , defaultValue = 5.0)
   settings["periodDisplayClock"]                = getOptionFromDeviceCustomization("periodDisplayClock"               , defaultValue = 10.0)
   settings["periodDispatchAsyncClockings"]      = getOptionFromDeviceCustomization("periodDispatchAsyncClockings"     , defaultValue = 120.0)  
@@ -333,7 +334,7 @@ def handleMigrationOfDataJson():
 def initializeParameters():
   parameters["wifiSignalQualityMessage"]  = getMsgTranslated("noWiFiSignal")[2]
   parameters["wifiStable"] = False
-  parameters["odooReachability"] = OdooState.toBeDefined
+  parameters["odooReachability"] = OdooState.notDefined
   parameters["odooReachabilityMessage"] = getMsgTranslated(parameters["odooReachability"].name)[2]
   parameters["odooUid"] = None
   parameters["odooIpPortOpen"]   = False
@@ -481,7 +482,7 @@ def evaluateOdooReachability():
     print("exception in evaluateOdooReachability ", e)
     parameters["odooIpPortOpen"]    = False
     parameters["wifiStable"]        = False
-    parameters["odooReachability"]  = OdooState.toBeDefined
+    parameters["odooReachability"]  = OdooState.notDefined
 
 def setOdooIpPort():
   settings["odooIpPort"] = None
@@ -632,6 +633,31 @@ def registerAttendanceWithRASownTimestamp(card, timestamp):
       setTimeout(None)
       return res
 
+#@timer
+def registerMultipleAsyncAttendances(attendancesToDispatch):
+  res=False
+  try:
+    serverProxy = getServerProxy("/xmlrpc/object")
+    if serverProxy:
+      setTimeout(float(settings["timeoutToRegisterMultipleAsyncAttendances"]) or None)
+      res = serverProxy.execute(
+        settings["odooParameters"]["db"][0],
+        parameters["odooUid"],
+        settings["odooParameters"]["user_password"][0],
+        "hr.employee",
+        "registerMultipleAsyncAttendances",
+        attendancesToDispatch,
+        )
+  except Exception as e:
+      print("registerMultipleAsyncAttendances - exception e:",e)
+      res = False
+  except socket.timeout as e:
+      print("timeout registerMultipleAsyncAttendances", e)
+      res=False
+  finally:
+      setTimeout(None)
+      return res
+
 def registerAttendanceSync(card):
   res=False
   try:
@@ -714,7 +740,7 @@ def getCardFromCardFilePath(cardFilePath):
 def convertLineIntoAttendance(card, line):
   splittedLine = line.split(",")
   attendanceID = splittedLine[0]
-  checkINorCheckOUT = splittedLine[1]  
+  checkINorCheckOUT = splittedLine[1].replace ("\n","")
   timestamp = attendanceIDtoTimestamp(attendanceID)
   attendance =[card, timestamp, checkINorCheckOUT]
   return attendance
@@ -727,8 +753,10 @@ def getAttendancesFromCardFile(cardFilePath):
   print("in getAttendancesFromCardFile, lines : ", lines) 
   card = getCardFromCardFilePath(cardFilePath) ####
   for line in lines:
+    print("in getAttendancesFromCardFile, line ---- : ", line) 
     attendanceFromThisLine = convertLineIntoAttendance(card, line) ####
-    attendancesFromCardFile = attendancesFromCardFile.extend(attendanceFromThisLine)
+    print("in getAttendancesFromCardFile, card "+card + " attendanceFromThisLine ", attendanceFromThisLine) 
+    attendancesFromCardFile.append(attendanceFromThisLine)
   return attendancesFromCardFile
 
 def getAttendancesToDispatch():
@@ -738,7 +766,8 @@ def getAttendancesToDispatch():
     attendancesToDispatch = []
     for cardFile in cardFilesToDispatch:
       attendancesFromCardFile = getAttendancesFromCardFile( dirAsyncClockings + cardFile)
-      attendancesToDispatch = attendancesToDispatch.extend(attendancesFromCardFile)
+      for attendance in attendancesFromCardFile:
+        attendancesToDispatch.append(attendance)
     return attendancesToDispatch
   except Exception as e:
     print("exception in getAttendancesToDispatch() :", e)
@@ -752,4 +781,6 @@ def dispatchAsyncClockings():
   attendancesToDispatch = getAttendancesToDispatch()
   print("")
   print("attendancesToDispatch ", attendancesToDispatch)
+  response = registerMultipleAsyncAttendances(attendancesToDispatch)
+  print("in dispatchAsyncClockings(), response from #odoo SERVER - registerMultipleAsyncAttendances(attendancesToDispatch) : ", response)
   removeAllAttendancesFiles()
