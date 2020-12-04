@@ -90,11 +90,16 @@ class Tasks:
 		exitFlag = threading.Event()
 		exitFlag.clear()
 
+
+		flagPausePollCardReader = threading.Event()
+		flagPausePollCardReader.clear()
+
 		srv = routes.startServerAdminCard(exitFlag)
 		
-		pollCardReader = threading.Thread(target=self.threadPollCardReader, args=(self.periodPollCardReader,exitFlag,self.displayCard_and_Buzz,))
-		serverKiller = threading.Thread(target=self.threadServerKiller, args=(
-															self.periodPollCardReader,exitFlag,srv))
+		pollCardReader 	= threading.Thread(target=self.threadPollCardReader,
+												args=(self.periodPollCardReader,exitFlag,self.displayCard_and_Buzz,flagPausePollCardReader,))
+		serverKiller 		= threading.Thread(target=self.threadServerKiller,
+												args=(self.periodPollCardReader,exitFlag,srv))
 
 		pollCardReader.start()
 		serverKiller.start()
@@ -124,19 +129,19 @@ class Tasks:
 		srv.shutdown()
 		_logger.debug('Thread Server Killer stopped')
 
-	def threadPollCardReader(self, period, exitFlag, whatToDoWithCard):
+	def threadPollCardReader(self, period, exitFlag, whatToDoWithCard, flagPausePollCardReader):
 		_logger.debug('Thread Poll Card Reader started')
 		while not exitFlag.isSet():
-			self.Reader.scan_card()
-			if self.Reader.card:
-				if self.Reader.card.lower() == Utils.settings["odooParameters"]["admin_id"][0].lower():
-					_logger.debug("ADMIN CARD was swipped\n")
-					self.nextTask = None
-					self.Reader.card = False    # Reset the value of the card, in order to allow
-																			# to enter in the loop again (avoid closed loop)
-					exitFlag.set()
-				else:
-					whatToDoWithCard()			
+			if not flagPausePollCardReader.isSet():
+				self.Reader.scan_card()
+				if self.Reader.card:
+					if self.Reader.card.lower() == Utils.settings["odooParameters"]["admin_id"][0].lower():
+						_logger.debug("ADMIN CARD was swipped\n")
+						self.nextTask = None
+						self.Reader.card = False    # Reset the value of the card, in order to allow to enter in the loop again (avoid closed loop)
+						exitFlag.set()
+					else:
+						whatToDoWithCard()			
 			exitFlag.wait(period)
 		_logger.debug('Thread Poll Card Reader stopped')
 
@@ -156,10 +161,13 @@ class Tasks:
 				Utils.evaluateOdooReachability()   # Odoo and Wifi Status Messages are updated
 				exitFlag.wait(period)
 		
-		def threadDispatchAsyncClockings(period):
+		def threadDispatchAsyncClockings(period, flagPausePollCardReader):
 			while not exitFlag.isSet():
 				print("in thread DispatchAsyncClockings")
-				Utils.dispatchAsyncClockings()
+				if Utils.parameters["odooReachability"] == Utils.OdooState.syncClockable:
+					flagPausePollCardReader.set()
+					Utils.dispatchAsyncClockings()					
+					flagPausePollCardReader.clear()
 				exitFlag.wait(period)
 
 		def threadDisplayClock(period):
@@ -173,16 +181,33 @@ class Tasks:
 		exitFlag = threading.Event()
 		exitFlag.clear()
 
+		flagPausePollCardReader = threading.Event()
+		flagPausePollCardReader.clear()
+
 		periodEvaluateReachability 		= Utils.settings["periodEvaluateReachability"]   # seconds		
 		periodDisplayClock         		= Utils.settings["periodDisplayClock"]  # seconds
 		periodDispatchAsyncClockings	= Utils.settings["periodDispatchAsyncClockings"]  # seconds
 
-		evaluateReachability    = threading.Thread(target=threadEvaluateReachability, args=(periodEvaluateReachability,))
-		dispatchAsyncClockings  = threading.Thread(target=threadDispatchAsyncClockings, args=(periodDispatchAsyncClockings,))
-		pollCardReader          = threading.Thread(target=self.threadPollCardReader, args=(self.periodPollCardReader,exitFlag,self.Clock.card_logging,))
-		displayClock            = threading.Thread(target=threadDisplayClock, args=(periodDisplayClock,))
-		checkBothButtonsPressed = threading.Thread(target=self.threadCheckBothButtonsPressed, args=(
-															self.periodCheckBothButtonsPressed, self.howLongShouldBeBothButtonsPressed, exitFlag))
+		evaluateReachability    = threading.Thread( target= threadEvaluateReachability,
+																args=( 	periodEvaluateReachability, ))
+
+		dispatchAsyncClockings  = threading.Thread( target= threadDispatchAsyncClockings,
+																args=( 	periodDispatchAsyncClockings,
+																				flagPausePollCardReader,))
+
+		pollCardReader          = threading.Thread( target=self.threadPollCardReader,
+																args=(	self.periodPollCardReader,
+																				exitFlag,
+																				self.Clock.card_logging,
+																				flagPausePollCardReader,))
+
+		displayClock            = threading.Thread(target=threadDisplayClock,
+																args=(	periodDisplayClock,	))
+
+		checkBothButtonsPressed = threading.Thread(target=self.threadCheckBothButtonsPressed,
+																args=(	self.periodCheckBothButtonsPressed,
+																				self.howLongShouldBeBothButtonsPressed,
+																				exitFlag))
 
 		evaluateReachability.start()
 		dispatchAsyncClockings.start()
@@ -227,9 +252,17 @@ class Tasks:
 
 		_logger.debug("Show RFID reader")
 		self.Disp.display_msg("swipecard")
+
 		exitFlag = threading.Event()
 		exitFlag.clear()
-		pollCardReader = threading.Thread(target=self.threadPollCardReader, args=(self.periodPollCardReader,exitFlag,self.displayCard_and_Buzz,))
+
+		flagPausePollCardReader = threading.Event()
+		flagPausePollCardReader.clear()
+
+		pollCardReader 	= threading.Thread( target= self.threadPollCardReader,
+												args=( 	self.periodPollCardReader,
+																exitFlag,self.displayCard_and_Buzz,
+																flagPausePollCardReader, ))
 
 		pollCardReader.start()
 
@@ -300,14 +333,26 @@ class Tasks:
 				exitFlag = threading.Event()
 				exitFlag.clear()
 
+				flagPausePollCardReader = threading.Event()
+				flagPausePollCardReader.clear()
+
 				srv = routes.startServerOdooParams(exitFlag)
 
-				pollCardReader 					= threading.Thread(target=self.threadPollCardReader, args=(
-																	self.periodPollCardReader,exitFlag,self.displayCard_and_Buzz,))
-				checkBothButtonsPressed = threading.Thread(target=self.threadCheckBothButtonsPressed, args=(
-																	self.periodCheckBothButtonsPressed, self.howLongShouldBeBothButtonsPressed, exitFlag))
-				serverKiller = threading.Thread(target=self.threadServerKiller, args=(
-																	self.periodPollCardReader,exitFlag,srv))
+				pollCardReader 					= threading.Thread( target=self.threadPollCardReader,
+																		args=(	self.periodPollCardReader,
+																						exitFlag,
+																						self.displayCard_and_Buzz,
+																						flagPausePollCardReader, ))
+
+				checkBothButtonsPressed = threading.Thread( target= self.threadCheckBothButtonsPressed,
+																		args=(	self.periodCheckBothButtonsPressed,
+																						self.howLongShouldBeBothButtonsPressed,
+																						exitFlag))
+
+				serverKiller 						= threading.Thread( target=self.threadServerKiller,
+																		args=(	self.periodPollCardReader,
+																						exitFlag,
+																						srv))
 
 				pollCardReader.start()
 				checkBothButtonsPressed.start()

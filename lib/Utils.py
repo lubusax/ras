@@ -776,6 +776,7 @@ def getAttendancesToDispatch():
 def removeAllAttendancesFiles():
   os.system("sudo rm "+dirAsyncClockings+"*")
 
+@timer
 def dispatchAsyncClockings():
   print("in dispatchAsyncClockings(), settings[periodDispatchAsyncClockings] ", settings["periodDispatchAsyncClockings"] )
   attendancesToDispatch = getAttendancesToDispatch()
