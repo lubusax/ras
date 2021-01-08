@@ -12,7 +12,7 @@ from lib import Utils
 Utils.beautifyJsonFile(Utils.WORK_DIR+"dicts/messagesDicDefault.json")
 Utils.beautifyJsonFile(Utils.WORK_DIR+"dicts/messagesDicEtRH.json")
 
-Utils.getSettingsFromDeviceCustomization()
+Utils.initializeSettings()
 initiallyStoredLanguage = Utils.settings["language"]
 initiallyFileForMessages = Utils.settings["fileForMessages"]
 
@@ -20,7 +20,7 @@ try:
   Utils.storeOptionInDeviceCustomization("fileForMessages","messagesDicDefault.json")
   #Utils.storeOptionInDeviceCustomization("fileForMessages","messagesDicEtRH.json")
 
-  Utils.getSettingsFromDeviceCustomization()
+  Utils.initializeSettings()
 
   listOfLanguages = Utils.getListOfLanguages()
 

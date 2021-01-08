@@ -25,6 +25,58 @@
       " "
     ]
   },
+  "AskIfDefineWifi": {
+    "ENGLISH": [
+      [
+        2,
+        0
+      ],
+      12,
+      "Press OK to\ndefine or change\nthe WiFi\nconnection\n-------------------------------\n"
+    ],
+    "ESPA\u00d1OL": [
+      [
+        0,
+        0
+      ],
+      12,
+      "Pulse OK para\ndefinir o cambiar\nla conexi\u00f3n \nWiFi\n-------------------------------\n"
+    ],
+    "FRAN\u00c7AIS": [
+      [
+        0,
+        0
+      ],
+      12,
+      "Appuyez sur OK\npour d\u00e9finir ou\nmodifier la\nconnexion WiFi\n-------------------------------\n"
+    ]
+  },
+  "AttendanceRegistered": {
+    "ENGLISH": [
+      [
+        0,
+        3
+      ],
+      16,
+      "... REGISTERED ....\n-EmployeePlaceholder-\n\n\n-----------------"
+    ],
+    "ESPA\u00d1OL": [
+      [
+        0,
+        3
+      ],
+      16,
+      ".... Registrado ....\n-EmployeePlaceholder-\n\n\n---------------------"
+    ],
+    "FRAN\u00c7AIS": [
+      [
+        0,
+        0
+      ],
+      16,
+      ".. Enregistr\u00e9 ..\n-EmployeePlaceholder-\n\n\n---------------------"
+    ]
+  },
   "ContactAdm": {
     "ENGLISH": [
       [
@@ -187,7 +239,7 @@
         2,
         0
       ],
-      14,
+      12,
       "Browse to\n-IpPlaceholder-:3000\nto define a new\nAdmin Card\n-------------------------\n"
     ],
     "ESPA\u00d1OL": [
@@ -195,7 +247,7 @@
         0,
         0
       ],
-      14,
+      12,
       "Navege a\n-IpPlaceholder-:3000\npara definir otra\nTARJETA ADMIN\n---------------------\n"
     ],
     "FRAN\u00c7AIS": [
@@ -203,7 +255,7 @@
         0,
         0
       ],
-      14,
+      12,
       "Ouvrez l\u00b4URL\n-IpPlaceholder-:3000\npour un nouveau\nBADGE ADMIN\n-------------------------\n"
     ]
   },
@@ -213,7 +265,7 @@
         2,
         0
       ],
-      14,
+      12,
       "Browse to\n-IpPlaceholder-:3000\nto introduce new\nOdoo Parameters\n-------------------------\n"
     ],
     "ESPA\u00d1OL": [
@@ -221,7 +273,7 @@
         0,
         0
       ],
-      14,
+      12,
       "Navege a\n-IpPlaceholder-:3000\npara definir nuevos\nPar\u00e1metros Odoo\n--------------------\n"
     ],
     "FRAN\u00c7AIS": [
@@ -229,7 +281,7 @@
         0,
         0
       ],
-      14,
+      12,
       "Ouvrez l\"URL\n-IpPlaceholder-:3000\npour definir les\nParam\u00e8tres Odoo\n-------------------------\n"
     ]
   },
@@ -326,7 +378,7 @@
         0
       ],
       10,
-      "ODOO DESCONECTADO\n-----------------\n"
+      "ODOO DESCONECTADO\n-------------------------------------------\n"
     ],
     "FRAN\u00c7AIS": [
       [
@@ -334,7 +386,7 @@
         0
       ],
       10,
-      "ODOO D\u00c9CONNECT\u00c9\n-------------------------\n"
+      "ODOO D\u00c9CONNECT\u00c9\n-------------------------------------------\n"
     ]
   },
   "clockScreen_databaseOK": {
@@ -352,7 +404,7 @@
         0
       ],
       10,
-      "ODOO CONECTADO\n-------------------------\n"
+      "ODOO CONECTADO\n-------------------------------------------\n"
     ],
     "FRAN\u00c7AIS": [
       [
@@ -360,7 +412,7 @@
         0
       ],
       10,
-      "ODOO CONNECT\u00c9\n------------------------\n"
+      "ODOO CONNECT\u00c9\n-------------------------------------------\n"
     ]
   },
   "clocking": {
@@ -586,7 +638,7 @@
         0
       ],
       10,
-      "ODOO NO RESPONDE\n-----------------------------\n"
+      "ODOO NO RESPONDE\n-------------------------------------------\n"
     ],
     "FRAN\u00c7AIS": [
       [
@@ -594,7 +646,7 @@
         0
       ],
       10,
-      "ODOO NE R\u00c9POND PAS\n----------------------------\n"
+      "ODOO NE R\u00c9POND PAS\n-------------------------------------------\n"
     ]
   },
   "listOfLanguages": [
@@ -747,7 +799,7 @@
         0
       ],
       10,
-      "NO HAY SE\u00d1AL WIFI\n\n\n\n\n-------------------\n"
+      "NO HAY SE\u00d1AL WIFI\n\n\n\n\n-------------------------------------------\n"
     ],
     "FRAN\u00c7AIS": [
       [
@@ -755,7 +807,7 @@
         0
       ],
       10,
-      "AUCUN SIGNAL WIFI\n\n\n\n\n-------------------\n"
+      "AUCUN SIGNAL WIFI\n\n\n\n\n-------------------------------------------\n"
     ]
   },
   "no_wifi": {
@@ -1137,7 +1189,7 @@
         0
       ],
       10,
-      "ODOO CONECTADO\n-------------------------\n"
+      "ODOO CONECTADO\n-------------------------------------------\n"
     ],
     "FRAN\u00c7AIS": [
       [
@@ -1145,7 +1197,7 @@
         0
       ],
       10,
-      "ODOO CONNECT\u00c9\n------------------------\n"
+      "ODOO CONNECT\u00c9\n-------------------------------------------\n"
     ]
   },
   "toBeDefined": {
@@ -1163,7 +1215,7 @@
         0
       ],
       10,
-      "ESPERE POR FAVOR\n-----------------\n"
+      "ESPERE POR FAVOR\n-------------------------------------------\n"
     ],
     "FRAN\u00c7AIS": [
       [
@@ -1171,7 +1223,7 @@
         0
       ],
       10,
-      "VEUILLEZ PATIENTER\n-------------------------\n"
+      "VEUILLEZ PATIENTER\n-------------------------------------------\n"
     ]
   },
   "update": {
@@ -1241,7 +1293,7 @@
         0
       ],
       10,
-      "REDEFINA EL USUARIO\n-----------------------------\n"
+      "REDEFINA EL USUARIO\n-------------------------------------------\n"
     ],
     "FRAN\u00c7AIS": [
       [
@@ -1249,7 +1301,7 @@
         0
       ],
       10,
-      "RED\u00c9FINIR L'UTILISATEUR\n----------------------------\n"
+      "RED\u00c9FINIR L'UTILISATEUR\n-------------------------------------------\n"
     ]
   },
   "wait": {

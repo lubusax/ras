@@ -37,6 +37,7 @@ dic = {
         (v, 20, s),
     ),
     "Local": ((v, hz, s / 2), (v, 20, s), (v, hz, s / 2), (v, 20, s)),
+    "AttendanceRegistered":  ((v, hz, s / 2), (v, 20, s), (v, hz/1.28, s), (v, 20, s*2),(v, hz*1.28, s), (v, 20, s)),
     "ContactAdm": (
         (v, hz * 4, s / 4),
         (v, 20, s / 2),

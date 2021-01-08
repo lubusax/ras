@@ -57,6 +57,8 @@ class Clocking:
 				self.msg = "FALSE"
 			Utils.registerLastAttendanceInFile(card, attendanceID, self.employeeName, self.msg)
 			Utils.storeAttendanceInFileToSendItToOdooLater(card, attendanceID, self.msg)
+			if Utils.settings["doNotShowIfCheckInOrCheckOut"] and self.msg!= "FALSE":
+				self.msg = "AttendanceRegistered"
 		except Exception as e:
 			print("exception in asynchronousHandler e:", e)
 
@@ -119,7 +121,7 @@ class Clocking:
 
 		print("clocking method ", self.clockingMethods[Utils.settings["clockingSyncOrAsync"]][Utils.parameters["odooReachability"].name])
 		self.clockingMethods[Utils.settings["clockingSyncOrAsync"]][Utils.parameters["odooReachability"].name]()
-		
+
 		self.Disp.display_msg(self.msg, self.employeeName)
 		self.Buzz.Play(self.msg)
 

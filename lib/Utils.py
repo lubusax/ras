@@ -233,12 +233,14 @@ def initializeSettings(): # getSettingsFromDeviceCustomization
   settings["firmwareVersion"]         = getOptionFromDeviceCustomization("firmwareVersion"          , defaultValue = "v1.4.4+")
   settings["timeoutToRegisterAttendanceSync"]   = getOptionFromDeviceCustomization("timeoutToRegisterAttendanceSync"  , defaultValue = 3.0)
   settings["timeoutToRegisterMultipleAsyncAttendances"]   = getOptionFromDeviceCustomization("timeoutToRegisterMultipleAsyncAttendances"  , defaultValue = 10.0)  
+  settings["timeoutToGetLastClockingsOfAllEmployeesFromOdoo"]   = getOptionFromDeviceCustomization("timeoutToGetLastClockingsOfAllEmployeesFromOdoo"  , defaultValue = 10.0)  
   settings["periodEvaluateReachability"]        = getOptionFromDeviceCustomization("periodEvaluateReachability"       , defaultValue = 5.0)
   settings["periodDisplayClock"]                = getOptionFromDeviceCustomization("periodDisplayClock"               , defaultValue = 10.0)
   settings["periodDispatchAsyncClockings"]      = getOptionFromDeviceCustomization("periodDispatchAsyncClockings"     , defaultValue = 120.0)  
   settings["timeToDisplayResultAfterClocking"]  = getOptionFromDeviceCustomization("timeToDisplayResultAfterClocking" , defaultValue = 1.2)
   settings["clockingSyncOrAsync"]               = getOptionFromDeviceCustomization("clockingSyncOrAsync"              , defaultValue = "sync")
   settings["periodSyncOStime"]                  = getOptionFromDeviceCustomization("periodSyncOStime"                 , defaultValue = 3610)
+  settings["doNotShowIfCheckInOrCheckOut"]      = getOptionFromDeviceCustomization("doNotShowIfCheckInOrCheckOut"     , defaultValue = True)
 
 def getMsg(textKey):
   try:
@@ -689,12 +691,37 @@ def migrationToCurrentVersion():
   handleMigrationOfDataJson()
   ensureNtplibModule()
 
+def getLastClockingsOfAllEmployeesFromOdoo():
+  res=False
+  try:
+    serverProxy = getServerProxy("/xmlrpc/object")
+    if serverProxy:
+      setTimeout(float(settings["timeoutToGetLastClockingsOfAllEmployeesFromOdoo"]) or None)
+      res = serverProxy.execute(
+        settings["odooParameters"]["db"][0],
+        parameters["odooUid"],
+        settings["odooParameters"]["user_password"][0],
+        "hr.employee",
+        "get_attendance_information_of_all_employees",
+        )
+  except Exception as e:
+      print("getLastClockingsOfAllEmployeesFromOdoo - exception e:",e)
+      res = False
+  except socket.timeout as e:
+      print("timeout getLastClockingsOfAllEmployeesFromOdoo", e)
+      res=False
+  finally:
+      setTimeout(None)
+      print(res)
+      return res
+
 def initializeDevice():
   migrationToCurrentVersion()
   initializeSettings()
   initializeParameters()
-  initializeKnownRFIDCards()
   getUIDfromOdoo()
+  getLastClockingsOfAllEmployeesFromOdoo()
+  initializeKnownRFIDCards()
 
 def attendanceIDtoTimestamp(id):
   try:
